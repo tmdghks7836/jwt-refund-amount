@@ -1,0 +1,2 @@
+com/jwt/szs/controller/MemberControllerTest.java
+ com.jwt.szs.controller.MemberControllerTest
