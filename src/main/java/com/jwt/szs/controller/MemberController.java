@@ -1,5 +1,7 @@
 package com.jwt.szs.controller;
 
+import com.jwt.szs.model.dto.AuthenticationMemberPrinciple;
+import com.jwt.szs.model.dto.MemberResponse;
 import com.jwt.szs.service.JwtTokenService;
 import com.jwt.szs.controller.advice.ValidateAccessTokenAdvice;
 import com.jwt.szs.controller.advice.ValidateTokenRedisAdvice;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,9 +52,17 @@ public class MemberController {
     @PostMapping("/signup")
     @ApiOperation(value = "회원가입")
     @ResponseStatus(HttpStatus.CREATED)
-    public void join(@RequestBody @Valid MemberCreationRequest memberCreationRequest) {
+    public void signUp(@RequestBody @Valid MemberCreationRequest memberCreationRequest) {
 
-        memberService.join(memberCreationRequest);
+        memberService.signUp(memberCreationRequest);
+    }
+
+    @PostMapping("/me")
+    @ApiOperation(value = "내 정보 보기")
+    @ResponseStatus(HttpStatus.CREATED)
+    public MemberResponse me(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
+
+        return memberService.getByUserId(principle.getUserId());
     }
 
     @GetMapping(value = "/token/re-issuance")
@@ -65,7 +76,7 @@ public class MemberController {
         proxyFactory.addAdvice(new ValidateTokenRedisAdvice(redisUtil, refreshToken));
         proxyFactory.addAdvice(new ValidateAccessTokenAdvice(redisUtil, accessToken, refreshToken)); // 공통으로 실행할 advice 객체 주입
         JwtTokenService proxy = (JwtTokenService) proxyFactory.getProxy();
-        
+
         String reIssuanceAccessToken = proxy.ReIssuanceAccessToken(refreshToken);
 
         return ResponseEntity.ok(reIssuanceAccessToken);

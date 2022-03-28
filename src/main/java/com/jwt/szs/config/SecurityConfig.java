@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // 커스텀 인증 필터
     @Bean
     public CustomAuthenticationFilter customAuthenticationProcessingFilter() throws Exception {
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/szs/authenticate");
+        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/szs/login");
         filter.setAuthenticationManager(authenticationManager());
         filter.setAuthenticationFailureHandler(authenticationFailureHandler);
         filter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);

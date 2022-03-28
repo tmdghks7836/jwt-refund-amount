@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 
-import java.io.IOException;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,9 +17,9 @@ public class CodeTest3o3ApiService {
 
     private final CodeTest3o3Api codeTest3o3Api;
 
-    public void getScrapByUsernameAndRegNo(ScrapRequest request) {
+    public void getScrapByNameAndRegNo(ScrapRequest request) {
 
-        Call<ScrapResponse> call = codeTest3o3Api.getScrapByUsernameAndRegNo(request);
+        Call<ScrapResponse> call = codeTest3o3Api.getScrapByNameAndRegNo(request);
 
 
 

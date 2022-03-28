@@ -1,12 +1,13 @@
 package com.jwt.szs.model.dto;
 
 import com.jwt.szs.model.base.BaseMember;
+import com.jwt.szs.model.entity.Member;
 import lombok.*;
 
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor()
+@NoArgsConstructor
 @AllArgsConstructor
 public class MemberResponse implements BaseMember {
 
@@ -14,4 +15,7 @@ public class MemberResponse implements BaseMember {
 
     private String userId;
 
+    private String name;
+
+    private String regNo;
 }

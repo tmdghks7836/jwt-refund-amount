@@ -38,11 +38,11 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
 
         String body = HttpUtils.getBody(request);
 
-        JsonObject usernamePasswordJson = JsonParser.parseString(body).getAsJsonObject();
-        String username = usernamePasswordJson.get("username").getAsString();
-        String password = usernamePasswordJson.get("password").getAsString();
+        JsonObject userIdPasswordJson = JsonParser.parseString(body).getAsJsonObject();
+        String userId = userIdPasswordJson.get("userId").getAsString();
+        String password = userIdPasswordJson.get("password").getAsString();
 
-        final MemberResponse memberResponse = memberService.authenticate(username, password);
+        final MemberResponse memberResponse = memberService.getByUserIdAndPassword(userId, password);
 
         final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
 
@@ -55,6 +55,6 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         response.addCookie(JwtTokenUtils.createRefreshTokenCookie(refreshJwt));
 
         return getAuthenticationManager()
-                .authenticate(new UsernamePasswordAuthenticationToken(username, password));
+                .authenticate(new UsernamePasswordAuthenticationToken(userId, password));
     }
 }

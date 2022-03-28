@@ -40,12 +40,8 @@ public class CodeTest3o3ApiConfig {
     @Bean
     public Retrofit retrofit(OkHttpClient client) {
 
-        Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy.MM.dd")
-                .create();
-
         return new Retrofit.Builder().baseUrl(codeTest3o3Url)
-                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addConverterFactory(GsonConverterFactory.create())
              //   .addConverterFactory(new BuildingTradeTypeConverterFactory())
                 .client(client).build();
     }

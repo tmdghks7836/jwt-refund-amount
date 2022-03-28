@@ -1,5 +1,6 @@
 package com.jwt.szs.model.dto;
 
+import com.jwt.szs.model.base.BaseMember;
 import com.jwt.szs.utils.JwtTokenUtils;
 import com.querydsl.core.util.ArrayUtils;
 import lombok.AccessLevel;
@@ -7,26 +8,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AuthenticationUserPrinciple implements UserDetails {
-
-    private String password;
+public class AuthenticationMemberPrinciple implements BaseMember {
 
     private String token;
 
-    private List<GrantedAuthority> authorities = new ArrayList<>();
-
-    private boolean enabled = true;
-
     //인가 플로우일때 생성
-    public AuthenticationUserPrinciple(String token) {
+    public AuthenticationMemberPrinciple(String token) {
         this.token = token;
     }
 
@@ -44,22 +37,11 @@ public class AuthenticationUserPrinciple implements UserDetails {
         return JwtTokenUtils.getId(token);
     }
 
-    public String getUsername() {
-        return JwtTokenUtils.getUsername(token);
+    public String getUserId() {
+        return JwtTokenUtils.getUserId(token);
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return enabled;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return enabled;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return enabled;
+    public String getName() {
+        return JwtTokenUtils.getName(token);
     }
 }

@@ -6,15 +6,14 @@ import com.google.gson.Gson;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.exception.ErrorResponse;
 import com.jwt.szs.model.base.BaseMember;
-import com.jwt.szs.model.dto.AuthenticationRequest;
-import com.jwt.szs.model.dto.MemberCreationRequest;
-import com.jwt.szs.model.dto.MemberResponse;
-import com.jwt.szs.model.dto.UserDetailsImpl;
+import com.jwt.szs.model.dto.*;
 import com.jwt.szs.model.type.JwtTokenType;
-import com.jwt.szs.service.CustomUserDetailsService;
 import com.jwt.szs.service.MemberService;
 import com.jwt.szs.utils.JwtTokenUtils;
 import com.jwt.szs.utils.RedisUtil;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,9 +55,6 @@ class MemberControllerTest {
 
     @MockBean
     private MemberService memberService;
-
-    @MockBean
-    private CustomUserDetailsService customUserDetailsService;
 
     private MockMvc mockMvc;
 
@@ -133,21 +129,23 @@ class MemberControllerTest {
 
     @Test
     public void 로그인() throws Exception {
-        MemberResponse memberResponse = MemberResponse.builder().userId("tmedghks").id(1l).build();
+        long id = 1l;
+        String userId = "tmdghks";
         String password = "123";
+        MemberResponse memberResponse = MemberResponse.builder().userId(userId).id(id).build();
 
-        Mockito.when(memberService.authenticate(memberResponse.getUserId(), password))
+        Mockito.when(memberService.getByUserIdAndPassword(userId, password))
                 .thenReturn(memberResponse);
-        Mockito.when(customUserDetailsService.loadUserByUsername(memberResponse.getUserId()))
+        Mockito.when(memberService.loadUserByUsername(userId))
                 .thenReturn(
                         new UserDetailsImpl(
-                                memberResponse.getId(),
-                                memberResponse.getUserId(),
+                                id,
+                                userId,
                                 passwordEncoder.encode(password)
                         ));
 
-        String json = usernamePasswordToJson(memberResponse.getUserId(), password);
-        MvcResult mvcResult = mockMvc.perform(post("/szs/authenticate")
+        String json = usernamePasswordToJson(userId, password);
+        MvcResult mvcResult = mockMvc.perform(post("/szs/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -161,9 +159,34 @@ class MemberControllerTest {
     }
 
     @Test
+    public void 내정보_보기() throws Exception {
+
+        mockMvc.perform(get("/api/test/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", ""))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andReturn();
+    }
+
+    @Test
+    public void 내정보_보기_인증실패() throws Exception {
+
+        mockMvc.perform(get("/api/test/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", ""))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andReturn();
+    }
+
+    @Test
     public void 토큰검증() throws Exception {
 
-        String token = generateAccessToken();
+        String token = generateAccessToken(
+                SimpleMember.builder()
+                        .id(1l)
+                        .name("홍길동")
+                        .userId("tmdghks").build()
+        );
 
         mockMvc.perform(get("/api/test/token")
                         .header("Authorization", "Bearer " + token)
@@ -208,7 +231,7 @@ class MemberControllerTest {
     public void 토큰재발급_실패_아직만료되지않은_액세스토큰() throws Exception {
 
         MemberResponse memberResponse = MemberResponse.builder().id(123l).userId("tmdghks").build();
-        String token = generateAccessToken();
+        String token = generateAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
         Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
@@ -232,10 +255,10 @@ class MemberControllerTest {
         return ErrorCode.findByCode(errorResponse.getCode());
     }
 
-    private String usernamePasswordToJson(String username, String password) {
+    private String usernamePasswordToJson(String userId, String password) {
 
         AuthenticationRequest request = AuthenticationRequest.builder()
-                .username(username)
+                .userId(userId)
                 .password(password)
                 .build();
 
@@ -243,21 +266,32 @@ class MemberControllerTest {
         return gson.toJson(request);
     }
 
-    private String generateAccessToken() {
+    private String generateAccessToken(BaseMember baseMember) {
 
-        MemberResponse memberResponse = MemberResponse.builder().id(1l).userId("tmdghks").build();
-        return JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
+        return JwtTokenUtils.generateToken(baseMember, JwtTokenType.ACCESS);
     }
 
-    private String generateExpiredAccessToken(BaseMember user) {
+    private String generateExpiredAccessToken(BaseMember baseMember) {
 
-        return JwtTokenUtils.generateToken(user, JwtTokenType.ACCESS, -1l);
+        return JwtTokenUtils.generateToken(baseMember, JwtTokenType.ACCESS, -1l);
     }
 
-    private Cookie generateRefreshTokenCookie(BaseMember user) {
+    private Cookie generateRefreshTokenCookie(BaseMember baseMember) {
 
-        MemberResponse memberResponse = MemberResponse.builder().id(user.getId()).userId(user.getUserId()).build();
-        final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.REFRESH);
+        final String token = JwtTokenUtils.generateToken(baseMember, JwtTokenType.REFRESH);
         return JwtTokenUtils.createRefreshTokenCookie(token);
     }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class SimpleMember implements BaseMember {
+
+        private Long id;
+
+        private String userId;
+
+        private String name;
+    }
+
 }

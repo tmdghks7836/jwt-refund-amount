@@ -29,8 +29,12 @@ public class JwtTokenUtils {
 
     private static final String jwtIssuer = "seungHwan";
 
-    public static String getUsername(String token) {
-        return extractAllClaims(token).get("username", String.class);
+    public static String getUserId(String token) {
+        return extractAllClaims(token).get("userId", String.class);
+    }
+
+    public static String getName(String token) {
+        return extractAllClaims(token).get("name", String.class);
     }
 
     public static Long getId(String token) {
@@ -75,7 +79,8 @@ public class JwtTokenUtils {
 
         Claims claims = Jwts.claims();
         claims.put("id", baseMember.getId());
-        claims.put("username", baseMember.getUserId());
+        claims.put("userId", baseMember.getUserId());
+        claims.put("name", baseMember.getName());
         claims.put("type", tokenType.getCookieName());
 
         log.info(tokenType.getCookieName());
@@ -84,7 +89,6 @@ public class JwtTokenUtils {
                 expireTime
         );
     }
-
 
     public static String generateToken(Claims claims, long expireTime) {
 
@@ -144,7 +148,7 @@ public class JwtTokenUtils {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        UserDetailsImpl userDetails = new UserDetailsImpl(getId(token), getUsername(token));
+        UserDetailsImpl userDetails = new UserDetailsImpl(getId(token), getUserId(token));
 
         return new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
     }

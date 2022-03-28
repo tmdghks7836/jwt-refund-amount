@@ -16,7 +16,7 @@ public class RedisUtil {
 
     public <T extends Object> Optional<T> getData(String key) {
         ValueOperations<Object, Object> valueOperations = redisTemplate.opsForValue();
-        return  Optional.of((T) valueOperations.get(key));
+        return  Optional.ofNullable((T) valueOperations.get(key));
     }
 
     public void setData(String key, Object value) {

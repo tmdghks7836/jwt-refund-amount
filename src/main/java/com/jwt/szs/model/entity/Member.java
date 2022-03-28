@@ -18,7 +18,6 @@ public class Member extends BaseDateTime implements BaseMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(length = 50)
     private Long id;
 
     @Column(length = 50, unique = true)
@@ -30,7 +29,7 @@ public class Member extends BaseDateTime implements BaseMember {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(length = 14,nullable = false)
     private String regNo;
 
 

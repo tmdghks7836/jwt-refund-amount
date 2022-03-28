@@ -1,7 +1,7 @@
 package com.jwt.szs.filter;
 
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
-import com.jwt.szs.model.dto.AuthenticationUserPrinciple;
+import com.jwt.szs.model.dto.AuthenticationMemberPrinciple;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        log.info("JwtTokenFilter.");
+        log.info("authorization check from jwtTokenFilter");
 
         String token = checkJwtTokenStrategy.getTokenByRequest(request);
 
@@ -39,11 +39,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private void authorization(String token) {
 
-        AuthenticationUserPrinciple authenticationUserPrinciple = new AuthenticationUserPrinciple(token);
+        AuthenticationMemberPrinciple authenticationMemberPrinciple = new AuthenticationMemberPrinciple(token);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                authenticationUserPrinciple, null,
-                authenticationUserPrinciple.getAuthorities()
+                authenticationMemberPrinciple, null,
+                authenticationMemberPrinciple.getAuthorities()
         );
 
 //        //TODO 필요한 코드인지?

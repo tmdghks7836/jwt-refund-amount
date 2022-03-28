@@ -2,7 +2,6 @@ package com.jwt.szs.controller.advice;
 
 import com.jwt.szs.exception.CustomRuntimeException;
 import com.jwt.szs.exception.ErrorCode;
-import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.utils.JwtTokenUtils;
 import com.jwt.szs.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -1,4 +1,0 @@
-com/jwt/szs/api/service/CodeTest3o3ApiServiceTest.java
- com.jwt.szs.api.service.CodeTest3o3ApiServiceTest
-com/jwt/szs/controller/MemberControllerTest.java
- com.jwt.szs.controller.MemberControllerTest

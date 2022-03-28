@@ -1,7 +1,6 @@
 package com.jwt.szs.api.service;
 
 import com.jwt.szs.api.codetest3o3.model.ScrapRequest;
-import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ class CodeTest3o3ApiServiceTest {
     public void getScrapByUsernameAndRegNo() throws InterruptedException {
 
         ScrapRequest request = new ScrapRequest("홍길동", "860824-1655068");
-        codeTest3o3ApiService.getScrapByUsernameAndRegNo(request);
+        codeTest3o3ApiService.getScrapByNameAndRegNo(request);
 
         for (int i = 0; i < 20; i++) {
 
