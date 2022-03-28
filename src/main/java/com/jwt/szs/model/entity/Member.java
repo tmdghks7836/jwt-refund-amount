@@ -1,6 +1,7 @@
 package com.jwt.szs.model.entity;
 
 import com.jwt.szs.model.base.BaseMember;
+import com.jwt.szs.model.entity.converter.EncryptedFieldConverter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,8 @@ public class Member extends BaseDateTime implements BaseMember {
     @Column(nullable = false)
     private String name;
 
-    @Column(length = 14,nullable = false)
+    @Convert(converter = EncryptedFieldConverter.class)
+    @Column(nullable = false)
     private String regNo;
 
 

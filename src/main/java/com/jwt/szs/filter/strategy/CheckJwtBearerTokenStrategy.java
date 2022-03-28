@@ -1,6 +1,7 @@
 package com.jwt.szs.filter.strategy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jwt.szs.model.dto.IssueTokenResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
@@ -14,18 +15,16 @@ import java.util.Map;
 /**
  * header의 Authorization : Bearer token 으로 검증합니다.
  */
-public class CheckJwtHeaderTokenStrategy implements CheckJwtTokenStrategy {
+public class CheckJwtBearerTokenStrategy implements CheckJwtTokenStrategy {
 
     @Override
     public void setResponseToken(HttpServletResponse response, String token) {
 
         try {
 
-            Map<String, String> map = new HashMap<>();
-            map.put("token", token);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getOutputStream()
-                    .write(new ObjectMapper().writeValueAsString(map).getBytes(StandardCharsets.UTF_8)
+                    .write(new ObjectMapper().writeValueAsString(new IssueTokenResponse(token)).getBytes(StandardCharsets.UTF_8)
                     );
 
         } catch (Exception e) {

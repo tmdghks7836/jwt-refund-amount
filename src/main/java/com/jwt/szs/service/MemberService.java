@@ -1,15 +1,19 @@
 package com.jwt.szs.service;
 
+import com.jwt.szs.api.codetest3o3.model.ScrapRequest;
+import com.jwt.szs.api.service.CodeTest3o3ApiService;
+import com.jwt.szs.exception.AlreadyDefinedException;
 import com.jwt.szs.exception.CustomRuntimeException;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.exception.ResourceNotFoundException;
+import com.jwt.szs.model.dto.AuthenticationMemberPrinciple;
 import com.jwt.szs.model.dto.MemberCreationRequest;
 import com.jwt.szs.model.dto.MemberResponse;
 import com.jwt.szs.model.dto.UserDetailsImpl;
 import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.model.mapper.MemberMapper;
 import com.jwt.szs.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,14 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberService implements UserDetailsService {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    private final CodeTest3o3ApiService codeTest3o3ApiService;
 
     @Override
     public UserDetails loadUserByUsername(final String userId) {
@@ -70,6 +75,12 @@ public class MemberService implements UserDetailsService {
     @Transactional
     public Long signUp(MemberCreationRequest creationRequest) {
 
+        Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
+
+        if(memberOptional.isPresent()){
+            throw new AlreadyDefinedException("이미 존재하는 유저 아이디입니다.");
+        }
+
         String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
         Member member = new Member(
                 creationRequest.getUserId(),
@@ -90,5 +101,18 @@ public class MemberService implements UserDetailsService {
                         new CustomRuntimeException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return MemberMapper.INSTANCE.modelToDto(member);
+    }
+
+    public void scrap(AuthenticationMemberPrinciple principle) {
+
+        Member member = memberRepository.findById(principle.getId())
+                .orElseThrow(() -> new ResourceNotFoundException());
+
+        codeTest3o3ApiService.getScrapByNameAndRegNo(
+                ScrapRequest.builder()
+                        .name(member.getName())
+                        .regNo(member.getRegNo())
+                        .build()
+        );
     }
 }

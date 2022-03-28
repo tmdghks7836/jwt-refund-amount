@@ -19,7 +19,10 @@ public enum ErrorCode {
     NOT_FOUND_PERMISSION(HttpStatus.FORBIDDEN, "E0008", "권한이 없습니다."),
     AUTHENTICATION_FAIL(HttpStatus.UNAUTHORIZED, "E0009", "인증에 실패하였습니다."),
     ALREADY_DEFINED(HttpStatus.BAD_REQUEST, "E0010", "이미 정의된 데이터입니다."),
-    NOT_MATCHED_PARAM_TYPE(HttpStatus.BAD_REQUEST, "E0011", "파라미터 타입이 맞지 않습니다.");
+    NOT_MATCHED_PARAM_TYPE(HttpStatus.BAD_REQUEST, "E0011", "파라미터 타입이 맞지 않습니다."),
+    ENCRYPTION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E0012", "대칭키 암호화에 실패하였습니다."),
+    DECRYPTION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E0013", "대칭키 복호화에 실패하였습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;

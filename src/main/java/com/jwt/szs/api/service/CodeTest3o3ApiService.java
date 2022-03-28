@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import javax.validation.Valid;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -17,11 +19,9 @@ public class CodeTest3o3ApiService {
 
     private final CodeTest3o3Api codeTest3o3Api;
 
-    public void getScrapByNameAndRegNo(ScrapRequest request) {
+    public void getScrapByNameAndRegNo(@Valid ScrapRequest request) {
 
         Call<ScrapResponse> call = codeTest3o3Api.getScrapByNameAndRegNo(request);
-
-
 
         call.enqueue(new CustomCallback<ScrapResponse>() {
 

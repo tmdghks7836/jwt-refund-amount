@@ -1,7 +1,7 @@
 package com.jwt.szs.config;
 
 import com.jwt.szs.filter.JwtTokenFilter;
-import com.jwt.szs.filter.strategy.CheckJwtHeaderTokenStrategy;
+import com.jwt.szs.filter.strategy.CheckJwtBearerTokenStrategy;
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ public class AppConfig {
 
     @Bean
     public CheckJwtTokenStrategy checkJwtTokenStrategy(){
-        return new CheckJwtHeaderTokenStrategy();
+        return new CheckJwtBearerTokenStrategy();
     }
 
     @Bean

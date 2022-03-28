@@ -1,13 +1,11 @@
 package com.jwt.szs.controller;
 
-import com.jwt.szs.model.dto.AuthenticationMemberPrinciple;
-import com.jwt.szs.model.dto.MemberResponse;
+import com.jwt.szs.api.service.CodeTest3o3ApiService;
+import com.jwt.szs.model.dto.*;
 import com.jwt.szs.service.JwtTokenService;
 import com.jwt.szs.controller.advice.ValidateAccessTokenAdvice;
 import com.jwt.szs.controller.advice.ValidateTokenRedisAdvice;
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
-import com.jwt.szs.model.dto.AuthenticationRequest;
-import com.jwt.szs.model.dto.MemberCreationRequest;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.service.MemberService;
 import com.jwt.szs.utils.JwtTokenUtils;
@@ -57,9 +55,9 @@ public class MemberController {
         memberService.signUp(memberCreationRequest);
     }
 
-    @PostMapping("/me")
+    @GetMapping("/me")
     @ApiOperation(value = "내 정보 보기")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public MemberResponse me(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
 
         return memberService.getByUserId(principle.getUserId());
@@ -67,7 +65,8 @@ public class MemberController {
 
     @GetMapping(value = "/token/re-issuance")
     @ApiOperation(value = "access token 재발급")
-    public ResponseEntity accessToken(HttpServletRequest request, HttpServletResponse res) {
+    @ResponseStatus(HttpStatus.OK)
+    public IssueTokenResponse accessToken(HttpServletRequest request, HttpServletResponse res) {
 
         String refreshToken = JwtTokenUtils.findCookie(request, JwtTokenType.REFRESH).getValue();
         String accessToken = jwtTokenStrategy.getTokenByRequest(request);
@@ -79,6 +78,14 @@ public class MemberController {
 
         String reIssuanceAccessToken = proxy.ReIssuanceAccessToken(refreshToken);
 
-        return ResponseEntity.ok(reIssuanceAccessToken);
+        return new IssueTokenResponse(reIssuanceAccessToken);
+    }
+
+    @PostMapping("/scrap")
+    @ApiOperation(value = "유저 정보 스크랩")
+    @ResponseStatus(HttpStatus.OK)
+    public void scrapMyInfo(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
+
+        memberService.scrap(principle);
     }
 }

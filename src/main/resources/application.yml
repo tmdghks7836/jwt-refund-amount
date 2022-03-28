@@ -15,7 +15,7 @@ spring:
   profiles: local
 
   datasource:
-    url: jdbc:h2:mem:rcdb
+    url: jdbc:h2:mem:ct3o3
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -38,6 +38,9 @@ spring:
 api:
   url:
     test-3o3: "https://codetest.3o3.co.kr/"
+
+encryption:
+  key: iwanttogetin3o3heworlddd34567890
 
 logging.level:
   org.hibernate.SQL: debug

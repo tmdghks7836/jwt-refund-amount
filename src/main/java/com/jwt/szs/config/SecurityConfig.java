@@ -78,6 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         String apiV1Path = "/szs/";
         return new String[]{
+                "/h2-console/**",
                 apiV1Path + "login",
                 apiV1Path + "signup",
                 apiV1Path + "token/re-issuance",
