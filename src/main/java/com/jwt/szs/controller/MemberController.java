@@ -27,7 +27,7 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "유저")
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/members")
+@RequestMapping("/szs")
 public class MemberController {
 
     private final RedisUtil redisUtil;
@@ -38,7 +38,7 @@ public class MemberController {
 
     private final JwtTokenService jwtTokenService;
 
-    @PostMapping(value = "/authenticate")
+    @PostMapping(value = "/login")
     @ApiOperation(value = "로그인")
     public ResponseEntity login(@RequestBody AuthenticationRequest authenticationRequest) {
 
@@ -46,7 +46,7 @@ public class MemberController {
         return null;
     }
 
-    @PostMapping("/join")
+    @PostMapping("/signup")
     @ApiOperation(value = "회원가입")
     @ResponseStatus(HttpStatus.CREATED)
     public void join(@RequestBody @Valid MemberCreationRequest memberCreationRequest) {
@@ -62,10 +62,10 @@ public class MemberController {
         String accessToken = jwtTokenStrategy.getTokenByRequest(request);
 
         ProxyFactory proxyFactory = new ProxyFactory(jwtTokenService); //프록시 팩토리에 원하는 클래스를 주입
-        proxyFactory.addAdvice(new ValidateAccessTokenAdvice(accessToken)); // 공통으로 실행할 advice 객체 주입
         proxyFactory.addAdvice(new ValidateTokenRedisAdvice(redisUtil, refreshToken));
+        proxyFactory.addAdvice(new ValidateAccessTokenAdvice(redisUtil, accessToken, refreshToken)); // 공통으로 실행할 advice 객체 주입
         JwtTokenService proxy = (JwtTokenService) proxyFactory.getProxy();
-
+        
         String reIssuanceAccessToken = proxy.ReIssuanceAccessToken(refreshToken);
 
         return ResponseEntity.ok(reIssuanceAccessToken);

@@ -1,38 +1,43 @@
 package com.jwt.szs.model.entity;
 
-import com.jwt.szs.model.base.RegisteredUser;
+import com.jwt.szs.model.base.BaseMember;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "member")
 @Getter
-@Setter
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member implements RegisteredUser {
+public class Member extends BaseDateTime implements BaseMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column( length = 50)
+    @Column(length = 50)
     private Long id;
 
-    @Column(name = "username", length = 50, unique = true)
-    private String username;
+    @Column(length = 50, unique = true)
+    private String userId;
 
-    @Column(name = "password", length = 200)
+    @Column(nullable = false)
     private String password;
 
-    public Member(String username, String password) {
-        this.username = username;
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String regNo;
+
+
+    public Member(String userId, String name, String regNo ,String password) {
+        this.userId = userId;
+        this.name = name;
+        this.regNo = regNo;
         this.password = password;
     }
 }

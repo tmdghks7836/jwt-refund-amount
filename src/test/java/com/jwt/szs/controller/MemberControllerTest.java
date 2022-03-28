@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.exception.ErrorResponse;
+import com.jwt.szs.model.base.BaseMember;
 import com.jwt.szs.model.dto.AuthenticationRequest;
 import com.jwt.szs.model.dto.MemberCreationRequest;
 import com.jwt.szs.model.dto.MemberResponse;
+import com.jwt.szs.model.dto.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
+import com.jwt.szs.service.CustomUserDetailsService;
 import com.jwt.szs.service.MemberService;
 import com.jwt.szs.utils.JwtTokenUtils;
 import com.jwt.szs.utils.RedisUtil;
@@ -16,9 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,6 +35,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,14 +48,19 @@ class MemberControllerTest {
     @Autowired
     private WebApplicationContext context;
 
-    @Autowired
+    @MockBean
     private RedisUtil redisUtil;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @MockBean
     private MemberService memberService;
 
-    private MockMvc mockMvc;
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
 
+    private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
@@ -61,9 +73,17 @@ class MemberControllerTest {
     @Test
     public void 회원가입() throws Exception {
 
-        String json = usernamePasswordToJson("tmdghks", "123");
+        Gson gson = new Gson();
+        String json = gson.toJson(
+                MemberCreationRequest.builder()
+                        .userId("tmdghks")
+                        .name("홍길동")
+                        .regNo("860824-1655068")
+                        .password("123")
+                        .build()
+        );
 
-        mockMvc.perform(post("/api/v1/members/join")
+        mockMvc.perform(post("/szs/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
@@ -71,19 +91,40 @@ class MemberControllerTest {
     }
 
     @Test
-    public void 회원가입_실패_요청값_검증() throws Exception {
+    public void 회원가입_실패_빈값체크() throws Exception {
 
-        String json = usernamePasswordToJson("tmdghks", "");
+        Gson gson = new Gson();
+        String json = gson.toJson(
+                MemberCreationRequest.builder()
+                        .userId("")
+                        .name("")
+                        .regNo("")
+                        .password("")
+                        .build()
+        );
 
-        mockMvc.perform(post("/api/v1/members/join")
+        mockMvc.perform(post("/szs/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andReturn();
+    }
 
-        json = usernamePasswordToJson("", "123");
+    @Test
+    public void 회원가입_실패_주민번호_정규식() throws Exception {
 
-        mockMvc.perform(post("/api/v1/members/join")
+        Gson gson = new Gson();
+
+        String json = gson.toJson(
+                MemberCreationRequest.builder()
+                        .userId("tmdghks")
+                        .name("홍길동")
+                        .regNo("8608241655068")
+                        .password("123")
+                        .build()
+        );
+
+        mockMvc.perform(post("/szs/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -92,20 +133,28 @@ class MemberControllerTest {
 
     @Test
     public void 로그인() throws Exception {
+        MemberResponse memberResponse = MemberResponse.builder().userId("tmedghks").id(1l).build();
+        String password = "123";
 
-        회원가입();
+        Mockito.when(memberService.authenticate(memberResponse.getUserId(), password))
+                .thenReturn(memberResponse);
+        Mockito.when(customUserDetailsService.loadUserByUsername(memberResponse.getUserId()))
+                .thenReturn(
+                        new UserDetailsImpl(
+                                memberResponse.getId(),
+                                memberResponse.getUserId(),
+                                passwordEncoder.encode(password)
+                        ));
 
-        String json = usernamePasswordToJson("tmdghks", "123");
-
-        MvcResult mvcResult = mockMvc.perform(post("/api/v1/members/authenticate")
+        String json = usernamePasswordToJson(memberResponse.getUserId(), password);
+        MvcResult mvcResult = mockMvc.perform(post("/szs/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        HashMap<String, String> hashMap = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), HashMap.class);
-
+        HashMap<String, String> hashMap = new ObjectMapper()
+                .readValue(mvcResult.getResponse().getContentAsString(), HashMap.class);
         String token = hashMap.get("token");
 
         Assertions.assertTrue(JwtTokenUtils.validate(token));
@@ -136,17 +185,16 @@ class MemberControllerTest {
     @Test
     public void 토큰재발급() throws Exception {
 
-        String username = "tmdghks";
-        String password = "123";
-        Long registeredId = memberService.join(new MemberCreationRequest(username, password));
+        MemberResponse memberResponse = MemberResponse.builder().id(123l).userId("tmdghks").build();
+        String token = generateExpiredAccessToken(memberResponse);
+        Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        String token = generateExpiredAccessToken(new MemberResponse(registeredId, username));
+        Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
+                .thenReturn(Optional.of(memberResponse.getId()));
+        Mockito.when(memberService.getById(memberResponse.getId()))
+                .thenReturn(memberResponse);
 
-        Cookie refreshTokenCookie = generateRefreshTokenCookie();
-        redisUtil.setDataContainsExpireDate(refreshTokenCookie.getValue(),
-                registeredId, JwtTokenType.REFRESH.getValidationSeconds());
-
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/members/token/re-issuance")
+        MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .cookie(refreshTokenCookie))
@@ -159,9 +207,14 @@ class MemberControllerTest {
     @Test
     public void 토큰재발급_실패_아직만료되지않은_액세스토큰() throws Exception {
 
+        MemberResponse memberResponse = MemberResponse.builder().id(123l).userId("tmdghks").build();
         String token = generateAccessToken();
-        Cookie refreshTokenCookie = generateRefreshTokenCookie();
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/members/token/re-issuance")
+        Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
+
+        Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
+                .thenReturn(Optional.of(memberResponse.getId()));
+
+        MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .cookie(refreshTokenCookie))
@@ -192,18 +245,18 @@ class MemberControllerTest {
 
     private String generateAccessToken() {
 
-        MemberResponse memberResponse = MemberResponse.builder().id(1l).username("tmdghks").build();
+        MemberResponse memberResponse = MemberResponse.builder().id(1l).userId("tmdghks").build();
         return JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
     }
 
-    private String generateExpiredAccessToken(MemberResponse memberResponse) {
+    private String generateExpiredAccessToken(BaseMember user) {
 
-        return JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS, -1l);
+        return JwtTokenUtils.generateToken(user, JwtTokenType.ACCESS, -1l);
     }
 
-    private Cookie generateRefreshTokenCookie() {
+    private Cookie generateRefreshTokenCookie(BaseMember user) {
 
-        MemberResponse memberResponse = MemberResponse.builder().id(1l).username("tmdghks").build();
+        MemberResponse memberResponse = MemberResponse.builder().id(user.getId()).userId(user.getUserId()).build();
         final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.REFRESH);
         return JwtTokenUtils.createRefreshTokenCookie(token);
     }

@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // 커스텀 인증 필터
     @Bean
     public CustomAuthenticationFilter customAuthenticationProcessingFilter() throws Exception {
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/api/v1/members/authenticate");
+        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/szs/authenticate");
         filter.setAuthenticationManager(authenticationManager());
         filter.setAuthenticationFailureHandler(authenticationFailureHandler);
         filter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
@@ -76,11 +76,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private String[] apiPathToAllow() {
 
-        String apiV1Path = "/api/v1/";
+        String apiV1Path = "/szs/";
         return new String[]{
-                apiV1Path + "members/authenticate",
-                apiV1Path + "members/join",
-                apiV1Path + "members/token/re-issuance",
+                apiV1Path + "login",
+                apiV1Path + "signup",
+                apiV1Path + "token/re-issuance",
         };
     }
 }

@@ -10,7 +10,7 @@ import com.jwt.szs.repository.MemberRepositorySupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ public class MemberService {
     private MemberRepositorySupport memberRepositorySupport;
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     public MemberResponse authenticate(String username, String password) {
 
@@ -35,7 +35,7 @@ public class MemberService {
 
         Member member = memberOptional.get();
 
-        if (!bCryptPasswordEncoder.matches(password, member.getPassword())) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new BadCredentialsException(ErrorCode.NOT_MATCHED_PASSWORD.getDescription());
         }
 
@@ -43,11 +43,14 @@ public class MemberService {
     }
 
     @Transactional
-    public Long join(MemberCreationRequest memberCreationRequest) {
+    public Long join(MemberCreationRequest creationRequest) {
 
+        String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
         Member member = new Member(
-                memberCreationRequest.getUsername(),
-                bCryptPasswordEncoder.encode(memberCreationRequest.getPassword())
+                creationRequest.getUserId(),
+                creationRequest.getName(),
+                creationRequest.getRegNo(),
+                encodedPassword
         );
 
         memberRepositorySupport.save(member);

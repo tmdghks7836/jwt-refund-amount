@@ -1,6 +1,6 @@
 package com.jwt.szs.utils;
 
-import com.jwt.szs.model.base.RegisteredUser;
+import com.jwt.szs.model.base.BaseMember;
 import com.jwt.szs.model.dto.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
 import io.jsonwebtoken.*;
@@ -66,16 +66,16 @@ public class JwtTokenUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public static String generateToken(RegisteredUser registeredUser, JwtTokenType tokenType) {
+    public static String generateToken(BaseMember baseMember, JwtTokenType tokenType) {
 
-        return generateToken(registeredUser, tokenType, tokenType.getValidationSeconds());
+        return generateToken(baseMember, tokenType, tokenType.getValidationSeconds());
     }
 
-    public static String generateToken(RegisteredUser registeredUser, JwtTokenType tokenType, long expireTime) {
+    public static String generateToken(BaseMember baseMember, JwtTokenType tokenType, long expireTime) {
 
         Claims claims = Jwts.claims();
-        claims.put("id", registeredUser.getId());
-        claims.put("username", registeredUser.getUsername());
+        claims.put("id", baseMember.getId());
+        claims.put("username", baseMember.getUserId());
         claims.put("type", tokenType.getCookieName());
 
         log.info(tokenType.getCookieName());
@@ -184,11 +184,11 @@ public class JwtTokenUtils {
         return CookieUtil.getCookie(request, tokenType.getCookieName());
     }
 
-    public static String generateAccessToken(RegisteredUser registeredUser) {
-        return generateToken(registeredUser, JwtTokenType.ACCESS);
+    public static String generateAccessToken(BaseMember baseMember) {
+        return generateToken(baseMember, JwtTokenType.ACCESS);
     }
 
-    public static String generateRefreshToken(RegisteredUser registeredUser) {
-        return generateToken(registeredUser, JwtTokenType.REFRESH);
+    public static String generateRefreshToken(BaseMember baseMember) {
+        return generateToken(baseMember, JwtTokenType.REFRESH);
     }
 }

@@ -67,6 +67,8 @@ public class APIExceptionHandler {
 
     @ExceptionHandler(value = BindException.class)
     public ResponseEntity handleMethodArgumentNotValid(BindException e) {
+
+        e.printStackTrace();
         BindingResult bindingResult = e.getBindingResult();
 
         StringBuilder builder = new StringBuilder();

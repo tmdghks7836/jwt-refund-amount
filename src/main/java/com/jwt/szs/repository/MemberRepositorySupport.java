@@ -41,10 +41,10 @@ public class MemberRepositorySupport extends QuerydslRepositorySupport {
 //                .fetch();
 //    }
 
-    public Optional<Member> findByUsername(String username) {
+    public Optional<Member> findByUsername(String userId) {
 
         Member member = queryFactory.selectFrom(qMember)
-                .where(qMember.username.eq(username))
+                .where(qMember.userId.eq(userId))
                 .fetchOne();
 
         return Optional.ofNullable(member);
