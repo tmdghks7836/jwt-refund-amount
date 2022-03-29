@@ -1,5 +1,7 @@
 package com.jwt.szs.service.strategy;
 
+import com.jwt.szs.service.strategy.base.IncomeTaxStrategy;
+
 /**
  * 근로소득 세액공제 계산 2021
  */

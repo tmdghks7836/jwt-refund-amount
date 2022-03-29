@@ -4,6 +4,10 @@ import com.jwt.szs.controller.advice.ValidateAccessTokenAdvice;
 import com.jwt.szs.controller.advice.ValidateTokenRedisAdvice;
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
 import com.jwt.szs.model.dto.*;
+import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
+import com.jwt.szs.model.dto.member.AuthenticationRequest;
+import com.jwt.szs.model.dto.member.MemberCreationRequest;
+import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.service.JwtTokenService;
 import com.jwt.szs.service.MemberService;
@@ -91,8 +95,8 @@ public class SzsMemberController {
     @GetMapping("/refund")
     @ApiOperation(value = "유저 환급액 계산 정보")
     @ResponseStatus(HttpStatus.OK)
-    public void refund(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
+    public EmployeeIncomeResponse refund(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
 
-        memberService.getRefundInformation(principle.getId());
+        return memberService.getRefundInformation(principle.getId());
     }
 }

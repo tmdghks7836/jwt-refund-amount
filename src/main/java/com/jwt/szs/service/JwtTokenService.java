@@ -1,6 +1,6 @@
 package com.jwt.szs.service;
 
-import com.jwt.szs.model.dto.MemberResponse;
+import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

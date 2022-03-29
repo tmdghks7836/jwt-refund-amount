@@ -22,6 +22,7 @@ public class Member extends BaseDateTime implements BaseMember {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    //TODO userId 지만 id와 혼란이 있을 여지가 있다. username ?
     @Column(length = 50, unique = true)
     private String userId;
 

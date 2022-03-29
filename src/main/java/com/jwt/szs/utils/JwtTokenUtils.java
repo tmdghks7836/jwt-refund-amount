@@ -1,7 +1,7 @@
 package com.jwt.szs.utils;
 
 import com.jwt.szs.model.base.BaseMember;
-import com.jwt.szs.model.dto.UserDetailsImpl;
+import com.jwt.szs.model.dto.member.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

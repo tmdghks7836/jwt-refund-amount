@@ -4,11 +4,12 @@ import com.jwt.szs.api.codetest3o3.model.ScrapRequest;
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.api.service.CodeTest3o3ApiService;
 import com.jwt.szs.core.CustomCallback;
-import com.jwt.szs.exception.AlreadyDefinedException;
-import com.jwt.szs.exception.CustomRuntimeException;
-import com.jwt.szs.exception.ErrorCode;
-import com.jwt.szs.exception.ResourceNotFoundException;
+import com.jwt.szs.exception.*;
 import com.jwt.szs.model.dto.*;
+import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
+import com.jwt.szs.model.dto.member.MemberCreationRequest;
+import com.jwt.szs.model.dto.member.MemberResponse;
+import com.jwt.szs.model.dto.member.UserDetailsImpl;
 import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.model.mapper.MemberMapper;
 import com.jwt.szs.repository.MemberRepository;
@@ -53,7 +54,7 @@ public class MemberService implements UserDetailsService {
     public MemberResponse getByUserId(String userId) {
 
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(new StringBuilder().append(userId).append(" not found").toString()));
+                .orElseThrow(() -> new MemberNotFoundException(userId));
 
         return MemberMapper.INSTANCE.modelToDto(member);
     }
@@ -101,7 +102,7 @@ public class MemberService implements UserDetailsService {
 
         Member member = memberRepository.findById(id)
                 .orElseThrow(() ->
-                        new CustomRuntimeException(ErrorCode.RESOURCE_NOT_FOUND));
+                        new MemberNotFoundException(id));
 
         return MemberMapper.INSTANCE.modelToDto(member);
     }
@@ -156,8 +157,11 @@ public class MemberService implements UserDetailsService {
     }
 
 
-    public void getRefundInformation(Long id) {
+    public EmployeeIncomeResponse getRefundInformation(Long id) {
 
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new MemberNotFoundException(id));
 
+        return employeeIncomeService.getRefund(member);
     }
 }

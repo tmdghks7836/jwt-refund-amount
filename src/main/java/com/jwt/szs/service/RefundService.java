@@ -1,8 +1,8 @@
 package com.jwt.szs.service;
 
-import com.jwt.szs.service.strategy.IncomeTaxLimitStrategy;
-import com.jwt.szs.service.strategy.IncomeTaxStrategy;
-import com.jwt.szs.service.strategy.RefundStrategy;
+import com.jwt.szs.service.strategy.base.IncomeTaxLimitStrategy;
+import com.jwt.szs.service.strategy.base.IncomeTaxStrategy;
+import com.jwt.szs.service.strategy.base.RefundStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,10 +18,18 @@ public class RefundService {
 
     private final RefundStrategy refundStrategy;
 
-    public Long calculateAmount(Long paymentAmount, Long calculatedTax){
+    public Long getIncomeTax(Long calculatedTax) {
+        return incomeTaxStrategy.calculate(calculatedTax);
+    }
 
-        Long incomeTaxAmount = incomeTaxStrategy.calculate(calculatedTax);
-        Long incomeTaxLimitAmount = incomeTaxLimitStrategy.calculate(paymentAmount);
+    public Long getIncomeTaxLimit(Long paymentAmount) {
+        return incomeTaxLimitStrategy.calculate(paymentAmount);
+    }
+
+    public Long calculateAmount(Long paymentAmount, Long calculatedTax) {
+
+        Long incomeTaxAmount = getIncomeTax(calculatedTax);
+        Long incomeTaxLimitAmount = getIncomeTaxLimit(paymentAmount);
         log.info("근로소득 세액공제 한도 : {}", incomeTaxLimitAmount);
         log.info("근로소득 세액공제 금액 : {}", incomeTaxAmount);
 

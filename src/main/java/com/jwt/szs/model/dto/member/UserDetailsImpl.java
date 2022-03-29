@@ -1,4 +1,4 @@
-package com.jwt.szs.model.dto;
+package com.jwt.szs.model.dto.member;
 
 import lombok.AccessLevel;
 import lombok.Data;

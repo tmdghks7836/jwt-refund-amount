@@ -22,7 +22,7 @@ public class EmployeeIncome extends BaseDateTime {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Member member;
 
     //기업명
@@ -52,6 +52,7 @@ public class EmployeeIncome extends BaseDateTime {
     public EmployeeIncome(Member member, EmployeeIncomeCreationRequest creationRequest) {
 
         this.member = member;
+        this.calculatedTax = creationRequest.getCalculatedTax();
         this.companyName = creationRequest.getCompanyName();
         this.paymentAmount = creationRequest.getPaymentAmount();
         this.businessStartDate = creationRequest.getBusinessStartDate();

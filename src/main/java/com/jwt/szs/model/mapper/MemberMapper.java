@@ -1,6 +1,6 @@
 package com.jwt.szs.model.mapper;
 
-import com.jwt.szs.model.dto.MemberResponse;
+import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.entity.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;

@@ -2,7 +2,7 @@ package com.jwt.szs.filter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jwt.szs.model.dto.MemberResponse;
+import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.service.MemberService;
 import com.jwt.szs.utils.HttpUtils;

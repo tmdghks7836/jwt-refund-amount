@@ -1,7 +1,7 @@
 package com.jwt.szs.filter;
 
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
-import com.jwt.szs.model.dto.AuthenticationMemberPrinciple;
+import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

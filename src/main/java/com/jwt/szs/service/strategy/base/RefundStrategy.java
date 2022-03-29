@@ -1,4 +1,4 @@
-package com.jwt.szs.service.strategy;
+package com.jwt.szs.service.strategy.base;
 
 import com.jwt.szs.model.entity.EmployeeIncome;
 
