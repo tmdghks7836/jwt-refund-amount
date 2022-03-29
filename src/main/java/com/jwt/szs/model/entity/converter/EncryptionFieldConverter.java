@@ -20,7 +20,7 @@ import java.security.NoSuchAlgorithmException;
 
 @Converter
 @Slf4j
-public class EncryptedFieldConverter implements AttributeConverter<String, String> {
+public class EncryptionFieldConverter implements AttributeConverter<String, String> {
 
     @Value("${encryption.key}")
     private String encryptionKey;

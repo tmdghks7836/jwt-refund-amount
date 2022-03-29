@@ -1,6 +1,7 @@
 package com.jwt.szs.api.codetest3o3.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.jwt.szs.exception.ResourceNotFoundException;
 import lombok.*;
 
 import java.util.List;
@@ -19,6 +20,22 @@ public class ScrapResponse {
     private String workerResDt;
 
     private String workerReqDt;
+
+    public IncomeInfo getIncomeInfo() {
+
+        return employeeData.getIncomeInfos()
+                .stream()
+                .findFirst().orElseThrow(() ->
+                        new ResourceNotFoundException("not found IncomeInfo."));
+    }
+
+    public CalculatedTax getCalculatedTex() {
+
+        return employeeData.getCalculatedTaxes()
+                .stream()
+                .findFirst().orElseThrow(() ->
+                        new ResourceNotFoundException("not found CalculatedTax."));
+    }
 
     @Getter
     @ToString
@@ -58,7 +75,7 @@ public class ScrapResponse {
         private String history;
 
         @SerializedName("총지급액")
-        private Long totalPayment;
+        private Long paymentAmount;
 
         @SerializedName("업무시작일")
         private String businessStartDate;

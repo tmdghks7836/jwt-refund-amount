@@ -1,15 +1,14 @@
 package com.jwt.szs.service;
 
 import com.jwt.szs.api.codetest3o3.model.ScrapRequest;
+import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.api.service.CodeTest3o3ApiService;
+import com.jwt.szs.core.CustomCallback;
 import com.jwt.szs.exception.AlreadyDefinedException;
 import com.jwt.szs.exception.CustomRuntimeException;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.exception.ResourceNotFoundException;
-import com.jwt.szs.model.dto.AuthenticationMemberPrinciple;
-import com.jwt.szs.model.dto.MemberCreationRequest;
-import com.jwt.szs.model.dto.MemberResponse;
-import com.jwt.szs.model.dto.UserDetailsImpl;
+import com.jwt.szs.model.dto.*;
 import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.model.mapper.MemberMapper;
 import com.jwt.szs.repository.MemberRepository;
@@ -21,6 +20,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import java.util.Optional;
 
@@ -34,6 +35,8 @@ public class MemberService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     private final CodeTest3o3ApiService codeTest3o3ApiService;
+
+    private final EmployeeIncomeService employeeIncomeService;
 
     @Override
     public UserDetails loadUserByUsername(final String userId) {
@@ -77,7 +80,7 @@ public class MemberService implements UserDetailsService {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
-        if(memberOptional.isPresent()){
+        if (memberOptional.isPresent()) {
             throw new AlreadyDefinedException("이미 존재하는 유저 아이디입니다.");
         }
 
@@ -108,11 +111,53 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findById(principle.getId())
                 .orElseThrow(() -> new ResourceNotFoundException());
 
-        codeTest3o3ApiService.getScrapByNameAndRegNo(
-                ScrapRequest.builder()
-                        .name(member.getName())
-                        .regNo(member.getRegNo())
-                        .build()
-        );
+        ScrapRequest scrapRequest = ScrapRequest.builder()
+                .name(member.getName())
+                .regNo(member.getRegNo())
+                .build();
+
+        codeTest3o3ApiService.getScrapByNameAndRegNo(scrapRequest, getScrapResponseCallback(member.getId()));
+    }
+
+    public void createEmployeeIncome(Long memberId, EmployeeIncomeCreationRequest employeeIncomeCreationRequest) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("notFound member by memberId " + memberId));
+
+        employeeIncomeService.create(member, employeeIncomeCreationRequest);
+    }
+
+    //TODO 다른 객체에 책임을 부여해야 하는지?
+    private CustomCallback<ScrapResponse> getScrapResponseCallback(Long memberId) {
+
+        return new CustomCallback<ScrapResponse>() {
+
+            @Override
+            public void onResponse(Call<ScrapResponse> call, Response<ScrapResponse> response) {
+                super.onResponse(call, response);
+
+                //TODO 실패시 멤버 스크랩 상태값을 변경해야함.
+                if (!response.isSuccessful()) {
+
+                }
+
+                ScrapResponse scrapResponse = response.body();
+                EmployeeIncomeCreationRequest employeeIncomeCreationRequest = new EmployeeIncomeCreationRequest(scrapResponse);
+
+                createEmployeeIncome(memberId, employeeIncomeCreationRequest);
+            }
+
+            @Override
+            public void onFailure(Call<ScrapResponse> call, Throwable t) {
+                super.onFailure(call, t);
+                //TODO 멤버 스크랩 상태값 실패로 변경
+            }
+        };
+    }
+
+
+    public void getRefundInformation(Long id) {
+
+
     }
 }

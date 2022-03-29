@@ -1,12 +1,11 @@
 package com.jwt.szs.controller;
 
-import com.jwt.szs.api.service.CodeTest3o3ApiService;
-import com.jwt.szs.model.dto.*;
-import com.jwt.szs.service.JwtTokenService;
 import com.jwt.szs.controller.advice.ValidateAccessTokenAdvice;
 import com.jwt.szs.controller.advice.ValidateTokenRedisAdvice;
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
+import com.jwt.szs.model.dto.*;
 import com.jwt.szs.model.type.JwtTokenType;
+import com.jwt.szs.service.JwtTokenService;
 import com.jwt.szs.service.MemberService;
 import com.jwt.szs.utils.JwtTokenUtils;
 import com.jwt.szs.utils.RedisUtil;
@@ -29,7 +28,7 @@ import javax.validation.Valid;
 @Api(tags = "유저")
 @RequiredArgsConstructor
 @RequestMapping("/szs")
-public class MemberController {
+public class SzsMemberController {
 
     private final RedisUtil redisUtil;
 
@@ -87,5 +86,13 @@ public class MemberController {
     public void scrapMyInfo(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
 
         memberService.scrap(principle);
+    }
+
+    @GetMapping("/refund")
+    @ApiOperation(value = "유저 환급액 계산 정보")
+    @ResponseStatus(HttpStatus.OK)
+    public void refund(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
+
+        memberService.getRefundInformation(principle.getId());
     }
 }
