@@ -13,7 +13,6 @@ import com.jwt.szs.model.dto.member.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.repository.redis.RedisRepository;
 import com.jwt.szs.service.MemberService;
-import com.jwt.szs.service.RefreshTokenService;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.Builder;
 import lombok.Getter;

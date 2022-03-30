@@ -1,14 +1,15 @@
 package com.jwt.szs.api.codetest3o3.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
 @Getter
-@Setter
-public class ScrapRequest {
+public class NameWithRegNoDto {
 
     private String name;
 

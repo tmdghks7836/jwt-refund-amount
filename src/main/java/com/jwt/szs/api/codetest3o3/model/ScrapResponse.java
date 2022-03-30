@@ -23,6 +23,10 @@ public class ScrapResponse {
 
     public IncomeInfo getIncomeInfo() {
 
+        if(employeeData == null){
+            return null;
+        }
+
         return employeeData.getIncomeInfos()
                 .stream()
                 .findFirst().orElseThrow(() ->
@@ -30,6 +34,10 @@ public class ScrapResponse {
     }
 
     public CalculatedTax getCalculatedTex() {
+
+        if(employeeData == null){
+            return null;
+        }
 
         return employeeData.getCalculatedTaxes()
                 .stream()

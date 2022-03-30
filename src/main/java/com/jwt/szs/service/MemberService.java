@@ -1,6 +1,6 @@
 package com.jwt.szs.service;
 
-import com.jwt.szs.api.codetest3o3.model.ScrapRequest;
+import com.jwt.szs.api.codetest3o3.model.NameWithRegNoDto;
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.api.service.CodeTest3o3ApiService;
 import com.jwt.szs.core.CustomCallback;
@@ -81,7 +81,7 @@ public class MemberService implements UserDetailsService {
     }
 
     @Transactional
-    public Long signUp(MemberCreationRequest creationRequest) {
+    public void signUp(MemberCreationRequest creationRequest) {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
@@ -89,17 +89,9 @@ public class MemberService implements UserDetailsService {
             throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
         }
 
-        String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
-        Member member = new Member(
-                creationRequest.getUserId(),
-                creationRequest.getName(),
-                creationRequest.getRegNo(),
-                encodedPassword
-        );
+        NameWithRegNoDto nameWithRegNoDto = new NameWithRegNoDto(creationRequest.getName(), creationRequest.getRegNo());
 
-        memberRepository.save(member);
-
-        return member.getId();
+        codeTest3o3ApiService.getScrapByNameAndRegNo(nameWithRegNoDto, signUpCallback(creationRequest));
     }
 
     public MemberResponse getById(Long id) {
@@ -126,12 +118,12 @@ public class MemberService implements UserDetailsService {
 
         memberScrapStatusService.pending(member.getId());
 
-        ScrapRequest scrapRequest = ScrapRequest.builder()
+        NameWithRegNoDto nameWithRegNoDto = NameWithRegNoDto.builder()
                 .name(member.getName())
                 .regNo(member.getRegNo())
                 .build();
 
-        codeTest3o3ApiService.getScrapByNameAndRegNo(scrapRequest, getScrapResponseCallback(member.getId()));
+        codeTest3o3ApiService.getScrapByNameAndRegNo(nameWithRegNoDto, getScrapResponseCallback(member.getId()));
     }
 
     /**
@@ -169,6 +161,48 @@ public class MemberService implements UserDetailsService {
         };
     }
 
+    public CustomCallback<ScrapResponse> signUpCallback(MemberCreationRequest creationRequest) {
+
+        return new CustomCallback<ScrapResponse>() {
+
+            @Override
+            public void onResponse(Call<ScrapResponse> call, Response<ScrapResponse> response) {
+                super.onResponse(call, response);
+
+                ScrapResponse scrapResponse = response.body();
+
+                if (!response.isSuccessful() || scrapResponse.getEmployeeData() == null
+                        || scrapResponse.getCalculatedTex() == null || scrapResponse.getIncomeInfo() == null) {
+                    //TODO 회원가입 상태 로그 저장
+                    return;
+                }
+
+                String workerName = scrapResponse.getIncomeInfo().getWorkerName();
+                String regNo = scrapResponse.getIncomeInfo().getRegNo();
+                String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
+
+                Member member = new Member(
+                        creationRequest.getUserId(),
+                        creationRequest.getName(),
+                        creationRequest.getRegNo(),
+                        encodedPassword
+                );
+
+                if (member.getName().equals(workerName) && member.getRegNo().equals(regNo)) {
+
+                    memberRepository.save(member);
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                super.onFailure(call, t);
+
+                //TODO 회원가입 상태 로그 저장
+                return;
+            }
+        };
+    }
 
     public EmployeeIncomeResponse getRefundInformation(Long id) {
 

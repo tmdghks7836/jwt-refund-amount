@@ -1,8 +1,8 @@
 package com.jwt.szs.service;
 
-import com.jwt.szs.service.strategy.IncomeTaxLimitStrategy2021;
-import com.jwt.szs.service.strategy.IncomeTaxStrategy2021;
-import com.jwt.szs.service.strategy.RefundStrategy2021;
+import com.jwt.szs.service.strategy.IncomeTaxLimitStrategyV1;
+import com.jwt.szs.service.strategy.IncomeTaxStrategyV1;
+import com.jwt.szs.service.strategy.RefundStrategyV1;
 import com.jwt.szs.service.strategy.base.IncomeTaxLimitStrategy;
 import com.jwt.szs.service.strategy.base.IncomeTaxStrategy;
 import com.jwt.szs.service.strategy.base.RefundStrategy;
@@ -40,21 +40,21 @@ class RefundServiceTest2021 {
         public IncomeTaxLimitStrategy incomeTaxLimitStrategy() {
 
             log.info("2021년도 세액 공제 한도계산 전략을 bean 으로 등록.");
-            return new IncomeTaxLimitStrategy2021();
+            return new IncomeTaxLimitStrategyV1();
         }
 
         @Bean
         public IncomeTaxStrategy incomeTaxStrategy() {
 
             log.info("2021년도 세액 공제 계산 전략을 bean 으로 등록.");
-            return new IncomeTaxStrategy2021();
+            return new IncomeTaxStrategyV1();
         }
 
         @Bean
         public RefundStrategy refundStrategy() {
 
             log.info("2021년도 환급 계산 전략을 bean 으로 등록.");
-            return new RefundStrategy2021();
+            return new RefundStrategyV1();
         }
     }
 

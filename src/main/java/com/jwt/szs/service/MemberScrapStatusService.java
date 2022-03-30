@@ -1,7 +1,6 @@
 package com.jwt.szs.service;
 
-import com.jwt.szs.api.codetest3o3.model.type.MemberScrapStatus;
-import com.jwt.szs.repository.redis.RedisRepository;
+import com.jwt.szs.api.codetest3o3.model.type.ScrapRequestStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberScrapStatusService {
 
-    public static final String SAVING_REDIS_KEY = "SCRAP_POST_STATUS_MEMBER_ID";
 
-    public static final Integer SAVING_REDIS_TIME = 1000 * 25;
+
 
     public void pending(Long memberId) {
 
@@ -24,12 +22,12 @@ public class MemberScrapStatusService {
 
     public Boolean isPending(Long memberId) {
 
-        return getStatus(memberId).equals(MemberScrapStatus.PENDING);
+        return getStatus(memberId).equals(ScrapRequestStatus.PENDING);
     }
 
-    public MemberScrapStatus getStatus(Long memberId) {
+    public ScrapRequestStatus getStatus(Long memberId) {
 
-        return MemberScrapStatus.NONE;
+        return ScrapRequestStatus.NONE;
     }
 
     public void requestFailed(Long memberId){

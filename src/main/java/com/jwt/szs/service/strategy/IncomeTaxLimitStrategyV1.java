@@ -2,7 +2,7 @@ package com.jwt.szs.service.strategy;
 
 import com.jwt.szs.service.strategy.base.IncomeTaxLimitStrategy;
 
-public class IncomeTaxLimitStrategy2021 implements IncomeTaxLimitStrategy {
+public class IncomeTaxLimitStrategyV1 implements IncomeTaxLimitStrategy {
 
     private final Long minPayment3300 = 33000000l;
 

@@ -1,10 +1,12 @@
 package com.jwt.szs.api.service;
 
-import com.jwt.szs.api.codetest3o3.model.ScrapRequest;
+import com.jwt.szs.api.codetest3o3.model.NameWithRegNoDto;
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.core.CustomCallback;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.service.MemberService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,8 @@ class CodeTest3o3ApiServiceTest {
         Long memberId = 1l;
         String regNo = "860824-1655068";
 
-        ScrapRequest request = new ScrapRequest(name, regNo);
+        NameWithRegNoDto nameWithRegNo = new NameWithRegNoDto(name, regNo);
+
         MemberResponse memberResponse = MemberResponse.builder()
                 .id(memberId)
                 .userId(userId)
@@ -47,7 +50,8 @@ class CodeTest3o3ApiServiceTest {
         final Boolean[] whetherToRespond = new Boolean[1];
         whetherToRespond[0] = false;
 
-        codeTest3o3ApiService.getScrapByNameAndRegNo(request,
+        codeTest3o3ApiService.getScrapByNameAndRegNo(nameWithRegNo,
+
                 new CustomCallback<ScrapResponse>() {
 
                     @Override
@@ -61,7 +65,7 @@ class CodeTest3o3ApiServiceTest {
                     public void onFailure(Call<ScrapResponse> call, Throwable t) {
                         super.onFailure(call, t);
                         whetherToRespond[0] = true;
-                        log.error("request scrap fail"  + t.getMessage());
+                        log.error("request scrap fail" + t.getMessage());
                     }
                 });
 
@@ -72,11 +76,12 @@ class CodeTest3o3ApiServiceTest {
 
             log.info(i.toString());
 
-            if(whetherToRespond[0]){
+            if (whetherToRespond[0]) {
                 break;
             }
         }
 
         Assertions.assertTrue(whetherToRespond[0]);
     }
+
 }

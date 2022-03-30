@@ -24,7 +24,7 @@ public class CodeTest3o3ApiConfig {
     public OkHttpClient okHttpClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
    //     NaverRealEstateTokenInterceptor tokenInterceptor = new NaverRealEstateTokenInterceptor(accessToken);
 
@@ -42,7 +42,6 @@ public class CodeTest3o3ApiConfig {
 
         return new Retrofit.Builder().baseUrl(codeTest3o3Url)
                 .addConverterFactory(GsonConverterFactory.create())
-             //   .addConverterFactory(new BuildingTradeTypeConverterFactory())
                 .client(client).build();
     }
 

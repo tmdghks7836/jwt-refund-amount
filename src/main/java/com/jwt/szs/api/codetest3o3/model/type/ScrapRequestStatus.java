@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.Arrays;
 
 @Getter
-public enum MemberScrapStatus {
+public enum ScrapRequestStatus {
 
     NONE("NONE"),
     PENDING("PENDING"),
@@ -15,14 +15,14 @@ public enum MemberScrapStatus {
 
     private String code;
 
-    MemberScrapStatus(String code){
+    ScrapRequestStatus(String code){
         this.code = code;
     }
 
-    public static MemberScrapStatus findByCode(String code){
+    public static ScrapRequestStatus findByCode(String code){
 
-        return Arrays.stream(MemberScrapStatus.values())
-                .filter(memberScrapStatus -> memberScrapStatus.getCode().equals(code))
+        return Arrays.stream(ScrapRequestStatus.values())
+                .filter(scrapRequestStatus -> scrapRequestStatus.getCode().equals(code))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("not foubd MemberScrapStatus. code : " + code));
     }

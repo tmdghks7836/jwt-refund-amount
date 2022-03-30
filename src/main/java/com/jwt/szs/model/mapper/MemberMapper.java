@@ -1,5 +1,6 @@
 package com.jwt.szs.model.mapper;
 
+import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.entity.Member;
 import org.mapstruct.Mapper;
@@ -17,6 +18,5 @@ public interface MemberMapper {
 
 
      MemberResponse modelToDto(Member member);
-
 
 }
