@@ -1,7 +1,7 @@
 package com.jwt.szs.filter.strategy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jwt.szs.model.dto.IssueTokenResponse;
+import com.jwt.szs.model.dto.jwt.IssueTokenResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
@@ -9,8 +9,6 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * header의 Authorization : Bearer token 으로 검증합니다.

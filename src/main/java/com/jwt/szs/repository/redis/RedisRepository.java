@@ -1,4 +1,4 @@
-package com.jwt.szs.utils;
+package com.jwt.szs.repository.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class RedisUtil {
+public class RedisRepository {
 
     private final RedisTemplate<Object, Object> redisTemplate;
 

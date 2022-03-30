@@ -5,5 +5,5 @@ package com.jwt.szs.service.strategy.base;
  * */
 public interface IncomeTaxStrategy {
 
-    Long calculate(Long calculatedTax);
+    Long calculate(final Long calculatedTax);
 }

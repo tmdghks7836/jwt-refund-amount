@@ -1,14 +1,24 @@
 package com.jwt.szs.service;
 
+import com.jwt.szs.service.strategy.IncomeTaxLimitStrategy2021;
+import com.jwt.szs.service.strategy.IncomeTaxStrategy2021;
+import com.jwt.szs.service.strategy.RefundStrategy2021;
 import com.jwt.szs.service.strategy.base.IncomeTaxLimitStrategy;
 import com.jwt.szs.service.strategy.base.IncomeTaxStrategy;
+import com.jwt.szs.service.strategy.base.RefundStrategy;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class RefundServiceTest {
+/**
+ * 2021년도 환급액 계산
+ */
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true", webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class RefundServiceTest2021 {
 
     @Autowired
     RefundService refundService;
@@ -18,6 +28,35 @@ class RefundServiceTest {
 
     @Autowired
     IncomeTaxLimitStrategy incomeTaxLimitStrategy;
+
+    @Autowired
+    RefundStrategy refundStrategy;
+
+    @Slf4j
+    @TestConfiguration
+    public static class RefundStrategyTestConfig2021 {
+
+        @Bean
+        public IncomeTaxLimitStrategy incomeTaxLimitStrategy() {
+
+            log.info("2021년도 세액 공제 한도계산 전략을 bean 으로 등록.");
+            return new IncomeTaxLimitStrategy2021();
+        }
+
+        @Bean
+        public IncomeTaxStrategy incomeTaxStrategy() {
+
+            log.info("2021년도 세액 공제 계산 전략을 bean 으로 등록.");
+            return new IncomeTaxStrategy2021();
+        }
+
+        @Bean
+        public RefundStrategy refundStrategy() {
+
+            log.info("2021년도 환급 계산 전략을 bean 으로 등록.");
+            return new RefundStrategy2021();
+        }
+    }
 
     @Test
     void 환급액_계산() {
@@ -74,7 +113,7 @@ class RefundServiceTest {
 
         Long calculateAmount = incomeTaxStrategy.calculate(calculatedTax);
 
-        Assertions.assertEquals(calculateAmount, (long)(calculatedTax * 0.55));
+        Assertions.assertEquals(calculateAmount, (long) (calculatedTax * 0.55));
     }
 
     @Test
@@ -84,7 +123,7 @@ class RefundServiceTest {
 
         Long calculateAmount = incomeTaxStrategy.calculate(calculatedTax);
 
-        Assertions.assertEquals(calculateAmount, (long)(calculatedTax * 0.55));
+        Assertions.assertEquals(calculateAmount, (long) (calculatedTax * 0.55));
     }
 
     @Test

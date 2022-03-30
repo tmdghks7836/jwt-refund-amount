@@ -39,8 +39,12 @@ public class MemberService implements UserDetailsService {
 
     private final EmployeeIncomeService employeeIncomeService;
 
+    private final MemberScrapStatusService memberScrapStatusService;
+
+
     @Override
     public UserDetails loadUserByUsername(final String userId) {
+
         Optional<Member> memberOptional = memberRepository.findByUserId(userId);
 
         if (!memberOptional.isPresent()) {
@@ -82,7 +86,7 @@ public class MemberService implements UserDetailsService {
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
         if (memberOptional.isPresent()) {
-            throw new AlreadyDefinedException("이미 존재하는 유저 아이디입니다.");
+            throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
@@ -112,6 +116,16 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findById(principle.getId())
                 .orElseThrow(() -> new ResourceNotFoundException());
 
+        if (employeeIncomeService.isPresent(member)) {
+            throw new AlreadyExistException("스크랩 정보가 이미 존재합니다.");
+        }
+
+        if (memberScrapStatusService.isPending(member.getId())) {
+            throw new CustomRuntimeException(ErrorCode.SCRAP_REQUEST_PENDING);
+        }
+
+        memberScrapStatusService.pending(member.getId());
+
         ScrapRequest scrapRequest = ScrapRequest.builder()
                 .name(member.getName())
                 .regNo(member.getRegNo())
@@ -120,6 +134,9 @@ public class MemberService implements UserDetailsService {
         codeTest3o3ApiService.getScrapByNameAndRegNo(scrapRequest, getScrapResponseCallback(member.getId()));
     }
 
+    /**
+     * 유저 근로 소득 정보 불러오기
+     */
     public void createEmployeeIncome(Long memberId, EmployeeIncomeCreationRequest employeeIncomeCreationRequest) {
 
         Member member = memberRepository.findById(memberId)
@@ -137,11 +154,6 @@ public class MemberService implements UserDetailsService {
             public void onResponse(Call<ScrapResponse> call, Response<ScrapResponse> response) {
                 super.onResponse(call, response);
 
-                //TODO 실패시 멤버 스크랩 상태값을 변경해야함.
-                if (!response.isSuccessful()) {
-
-                }
-
                 ScrapResponse scrapResponse = response.body();
                 EmployeeIncomeCreationRequest employeeIncomeCreationRequest = new EmployeeIncomeCreationRequest(scrapResponse);
 
@@ -151,7 +163,8 @@ public class MemberService implements UserDetailsService {
             @Override
             public void onFailure(Call<ScrapResponse> call, Throwable t) {
                 super.onFailure(call, t);
-                //TODO 멤버 스크랩 상태값 실패로 변경
+
+                memberScrapStatusService.requestFailed(memberId);
             }
         };
     }
@@ -162,6 +175,6 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberNotFoundException(id));
 
-        return employeeIncomeService.getRefund(member);
+        return employeeIncomeService.getByMember(member);
     }
 }

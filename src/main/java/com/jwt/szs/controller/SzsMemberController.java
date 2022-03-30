@@ -1,23 +1,21 @@
 package com.jwt.szs.controller;
 
-import com.jwt.szs.controller.advice.ValidateAccessTokenAdvice;
-import com.jwt.szs.controller.advice.ValidateTokenRedisAdvice;
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
-import com.jwt.szs.model.dto.*;
+import com.jwt.szs.model.dto.EmployeeIncomeResponse;
+import com.jwt.szs.model.dto.jwt.IssueTokenResponse;
+import com.jwt.szs.model.dto.jwt.ReIssuanceTokenDto;
 import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
 import com.jwt.szs.model.dto.member.AuthenticationRequest;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
-import com.jwt.szs.service.JwtTokenService;
 import com.jwt.szs.service.MemberService;
+import com.jwt.szs.service.RefreshTokenService;
 import com.jwt.szs.utils.JwtTokenUtils;
-import com.jwt.szs.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,13 +32,11 @@ import javax.validation.Valid;
 @RequestMapping("/szs")
 public class SzsMemberController {
 
-    private final RedisUtil redisUtil;
-
     private final MemberService memberService;
 
     private final CheckJwtTokenStrategy jwtTokenStrategy;
 
-    private final JwtTokenService jwtTokenService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping(value = "/login")
     @ApiOperation(value = "로그인")
@@ -74,12 +70,11 @@ public class SzsMemberController {
         String refreshToken = JwtTokenUtils.findCookie(request, JwtTokenType.REFRESH).getValue();
         String accessToken = jwtTokenStrategy.getTokenByRequest(request);
 
-        ProxyFactory proxyFactory = new ProxyFactory(jwtTokenService); //프록시 팩토리에 원하는 클래스를 주입
-        proxyFactory.addAdvice(new ValidateTokenRedisAdvice(redisUtil, refreshToken));
-        proxyFactory.addAdvice(new ValidateAccessTokenAdvice(redisUtil, accessToken, refreshToken)); // 공통으로 실행할 advice 객체 주입
-        JwtTokenService proxy = (JwtTokenService) proxyFactory.getProxy();
-
-        String reIssuanceAccessToken = proxy.ReIssuanceAccessToken(refreshToken);
+        ReIssuanceTokenDto reIssuanceTokenDto = ReIssuanceTokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+        String reIssuanceAccessToken = refreshTokenService.ReIssuanceAccessToken(reIssuanceTokenDto);
 
         return new IssueTokenResponse(reIssuanceAccessToken);
     }

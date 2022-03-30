@@ -28,7 +28,8 @@ public class EmployeeIncomeService {
         employeeIncomeRepository.save(employeeIncome);
     }
 
-    public EmployeeIncomeResponse getRefund(Member member) {
+    //TODO 현재년도도 체크
+    public EmployeeIncomeResponse getByMember(Member member) {
 
         EmployeeIncome employeeIncome = employeeIncomeRepository.findByMember(member)
                 .orElseThrow(() -> new ResourceNotFoundException("not found member id : " + member.getId()));
@@ -43,6 +44,12 @@ public class EmployeeIncomeService {
                 .taxAmount(incomeTax.toString())
                 .refundAmount(refundAmount.toString())
                 .taxLimitAmount(incomeTaxLimit.toString()).build();
+    }
+
+    //TODO 현재 년도도 체크
+    public Boolean isPresent(Member member) {
+
+        return employeeIncomeRepository.findByMember(member).isPresent();
     }
 
 }

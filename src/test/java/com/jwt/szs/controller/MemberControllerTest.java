@@ -11,9 +11,10 @@ import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.dto.member.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
+import com.jwt.szs.repository.redis.RedisRepository;
 import com.jwt.szs.service.MemberService;
+import com.jwt.szs.service.RefreshTokenService;
 import com.jwt.szs.utils.JwtTokenUtils;
-import com.jwt.szs.utils.RedisUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,7 +52,7 @@ class MemberControllerTest {
     private WebApplicationContext context;
 
     @MockBean
-    private RedisUtil redisUtil;
+    private RedisRepository redisRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -215,7 +216,7 @@ class MemberControllerTest {
         String token = generateExpiredAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
+        Mockito.when(redisRepository.getData(refreshTokenCookie.getValue()))
                 .thenReturn(Optional.of(memberResponse.getId()));
         Mockito.when(memberService.getById(memberResponse.getId()))
                 .thenReturn(memberResponse);
@@ -237,7 +238,7 @@ class MemberControllerTest {
         String token = generateAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
+        Mockito.when(redisRepository.getData(refreshTokenCookie.getValue()))
                 .thenReturn(Optional.of(memberResponse.getId()));
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
