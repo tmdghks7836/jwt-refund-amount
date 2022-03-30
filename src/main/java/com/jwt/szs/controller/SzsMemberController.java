@@ -48,7 +48,7 @@ public class SzsMemberController {
 
     @PostMapping("/signup")
     @ApiOperation(value = "회원가입")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public void signUp(@RequestBody @Valid MemberCreationRequest memberCreationRequest) {
 
         memberService.signUp(memberCreationRequest);

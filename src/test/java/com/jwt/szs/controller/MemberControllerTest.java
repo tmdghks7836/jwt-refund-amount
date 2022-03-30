@@ -85,7 +85,7 @@ class MemberControllerTest {
         mockMvc.perform(post("/szs/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }
 

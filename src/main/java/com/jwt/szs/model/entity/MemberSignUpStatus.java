@@ -9,16 +9,15 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 
 //TODO
 @Entity
-@Table(name = "member_scrap_status")
+@Table(name = "member_sign_up_status")
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberScrapStatus extends BaseDateTime {
+public class MemberSignUpStatus extends BaseDateTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,7 +33,7 @@ public class MemberScrapStatus extends BaseDateTime {
 //    @Column(nullable = false)
 //    private LocalDate
 
-    public MemberScrapStatus(Member member, EmployeeIncomeCreationRequest creationRequest) {
+    public MemberSignUpStatus(Member member, EmployeeIncomeCreationRequest creationRequest) {
 
         this.member = member;
 //        this.calculatedTax = creationRequest.getCalculatedTax();
