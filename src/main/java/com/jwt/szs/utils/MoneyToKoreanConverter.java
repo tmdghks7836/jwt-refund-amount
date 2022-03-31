@@ -14,10 +14,6 @@ public class MoneyToKoreanConverter {
 
     public String convert(final Long money) {
 
-        if(money == 0){
-            return "0원";
-        }
-
         long absMoney = Math.abs(money);
 
         String[] korean = {"만", "억", "조", "경"};
@@ -52,7 +48,7 @@ public class MoneyToKoreanConverter {
             sb.append(remain);
         }
 
-        sb.append("원");
+        sb.append(money != 0 ? "원" : "0원");
         String result = money < 0 ? "-" + sb : sb.toString();
         log.info(result);
         return result;
