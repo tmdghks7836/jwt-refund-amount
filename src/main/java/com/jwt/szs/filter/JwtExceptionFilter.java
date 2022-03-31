@@ -2,6 +2,7 @@ package com.jwt.szs.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.jwt.szs.exception.CustomRuntimeException;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.exception.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,12 +26,17 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
-        try {  // 앞단 필터에서 에러가 있을 시 이 필터로 넘어온다.
+
+        try {
             chain.doFilter(req, res);
         } catch (ExpiredJwtException e) {
             setErrorResponse(ErrorCode.TOKEN_EXPIRED, res, e);
         } catch (JwtException e) {
             setErrorResponse(ErrorCode.VALIDATE_TOKEN_FAILED, res, e);
+        } catch (CustomRuntimeException e){
+            setErrorResponse(e.getErrorCode(), res, e);
+        } catch (Throwable throwable){
+            setErrorResponse(ErrorCode.SERVER_ERROR, res, throwable);
         }
     }
 

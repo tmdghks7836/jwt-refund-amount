@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -20,37 +19,17 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtTokenFilter extends OncePerRequestFilter {
-
-    private final CheckJwtTokenStrategy checkJwtTokenStrategy;
+public class RequestUrlLoggingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        log.info("authorization check from jwtTokenFilter");
-
-        String token = checkJwtTokenStrategy.getTokenByRequest(request);
-
-        if (JwtTokenUtils.validate(token)) {
-            authorization(token);
-        }
-
+        String path = request.getRequestURI();
+        String contentType = request.getContentType();
+        log.info("Request URL path : {}, Request content type: {}", path, contentType);
         chain.doFilter(request, response);
     }
 
-    private void authorization(String token) {
 
-        AuthenticationMemberPrinciple authenticationMemberPrinciple = new AuthenticationMemberPrinciple(token);
-
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                authenticationMemberPrinciple, null,
-                authenticationMemberPrinciple.getAuthorities()
-        );
-
-//        //TODO 필요한 코드인지?
-//        authentication.setDetails(userDetails);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
 }

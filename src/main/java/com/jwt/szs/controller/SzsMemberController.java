@@ -1,17 +1,12 @@
 package com.jwt.szs.controller;
 
-import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
+import com.jwt.szs.filter.ReIssuanceAccessTokenFilter;
 import com.jwt.szs.model.dto.EmployeeIncomeResponse;
-import com.jwt.szs.model.dto.jwt.IssueTokenResponse;
-import com.jwt.szs.model.dto.jwt.ReIssuanceTokenDto;
 import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
 import com.jwt.szs.model.dto.member.AuthenticationRequest;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
-import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.service.MemberService;
-import com.jwt.szs.service.RefreshTokenService;
-import com.jwt.szs.utils.JwtTokenUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +28,6 @@ import javax.validation.Valid;
 public class SzsMemberController {
 
     private final MemberService memberService;
-
-    private final CheckJwtTokenStrategy jwtTokenStrategy;
-
-    private final RefreshTokenService refreshTokenService;
 
     @PostMapping(value = "/login")
     @ApiOperation(value = "로그인")
@@ -64,19 +55,9 @@ public class SzsMemberController {
 
     @GetMapping(value = "/token/re-issuance")
     @ApiOperation(value = "access token 재발급")
-    @ResponseStatus(HttpStatus.OK)
-    public IssueTokenResponse accessToken(HttpServletRequest request, HttpServletResponse res) {
+    public void reIssuanceToken() {
 
-        String refreshToken = JwtTokenUtils.findCookie(request, JwtTokenType.REFRESH).getValue();
-        String accessToken = jwtTokenStrategy.getTokenByRequest(request);
-
-        ReIssuanceTokenDto reIssuanceTokenDto = ReIssuanceTokenDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-        String reIssuanceAccessToken = refreshTokenService.ReIssuanceAccessToken(reIssuanceTokenDto);
-
-        return new IssueTokenResponse(reIssuanceAccessToken);
+        log.info("ReIssuanceAccessTokenFilter 에서 액세스 토큰 재발급을 진행합니다. {}", ReIssuanceAccessTokenFilter.class);
     }
 
     @PostMapping("/scrap")

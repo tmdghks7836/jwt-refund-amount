@@ -1,12 +1,11 @@
 package com.jwt.szs.config;
 
-import com.jwt.szs.filter.JwtExceptionFilter;
+import com.jwt.szs.filter.*;
 import com.jwt.szs.handler.CustomAuthenticationFailureHandler;
 import com.jwt.szs.handler.CustomAuthenticationSuccessHandler;
 import com.jwt.szs.handler.JwtAuthenticationEntryPoint;
-import com.jwt.szs.filter.CustomAuthenticationFilter;
-import com.jwt.szs.filter.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,6 +25,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenFilter jwtTokenFilter;
 
     private final JwtExceptionFilter jwtExceptionFilter;
+
+    private final ReIssuanceAccessTokenFilter reIssuanceAccessTokenFilter;
+
+    private final RequestUrlLoggingFilter requestUrlLoggingFilter;
 
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
@@ -72,10 +75,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(customAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtTokenFilter, CustomAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtTokenFilter.class)
+                .addFilterBefore(reIssuanceAccessTokenFilter, JwtTokenFilter.class)
+                .addFilterBefore(jwtExceptionFilter, ReIssuanceAccessTokenFilter.class)
+                .addFilterBefore(requestUrlLoggingFilter, JwtExceptionFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint);
     }
+
 
     private String[] apiPathToAllow() {
 
