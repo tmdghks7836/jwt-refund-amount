@@ -6,6 +6,7 @@ import com.jwt.szs.model.dto.EmployeeIncomeResponse;
 import com.jwt.szs.model.entity.EmployeeIncome;
 import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.repository.EmployeeIncomeRepository;
+import com.jwt.szs.utils.MoneyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,12 +39,12 @@ public class EmployeeIncomeService {
         Long incomeTaxLimit = refundService.getIncomeTaxLimit(employeeIncome.getPaymentAmount());
         Long refundAmount = refundService.calculateAmount(employeeIncome.getPaymentAmount(), employeeIncome.getCalculatedTax());
 
-        //TODO 금액 한국 한글 화폐단위로 변경
         return EmployeeIncomeResponse.builder()
                 .name(employeeIncome.getMember().getName())
-                .taxAmount(incomeTax.toString())
-                .refundAmount(refundAmount.toString())
-                .taxLimitAmount(incomeTaxLimit.toString()).build();
+                .taxAmount(MoneyUtils.convertKorean(incomeTax))
+                .taxLimitAmount(MoneyUtils.convertKorean(incomeTaxLimit))
+                .refundAmount(MoneyUtils.convertKorean(refundAmount))
+                .build();
     }
 
     //TODO 현재 년도도 체크

@@ -1,18 +1,15 @@
 package com.jwt.szs.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.parameters.P;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
-public class MoneyToKoreanConverter {
+public class MoneyUtils {
 
 
-    public String convert(final Long money) {
+    public static String convertKorean(final Long money) {
 
         long absMoney = Math.abs(money);
 

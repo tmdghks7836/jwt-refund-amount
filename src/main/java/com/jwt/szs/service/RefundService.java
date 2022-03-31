@@ -18,15 +18,15 @@ public class RefundService {
 
     private final RefundStrategy refundStrategy;
 
-    public Long getIncomeTax(Long calculatedTax) {
+    public Long getIncomeTax(final Long calculatedTax) {
         return incomeTaxStrategy.calculate(calculatedTax);
     }
 
-    public Long getIncomeTaxLimit(Long paymentAmount) {
+    public Long getIncomeTaxLimit(final Long paymentAmount) {
         return incomeTaxLimitStrategy.calculate(paymentAmount);
     }
 
-    public Long calculateAmount(Long paymentAmount, Long calculatedTax) {
+    public Long calculateAmount(final Long paymentAmount,final Long calculatedTax) {
 
         Long incomeTaxAmount = getIncomeTax(calculatedTax);
         Long incomeTaxLimitAmount = getIncomeTaxLimit(paymentAmount);

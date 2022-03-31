@@ -30,7 +30,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         String token = checkJwtTokenStrategy.getTokenByRequest(request);
 
-        if (StringUtils.hasText(token) && JwtTokenUtils.validate(token)) {
+        if (JwtTokenUtils.validate(token)) {
             authorization(token);
         }
 

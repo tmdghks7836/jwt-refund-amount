@@ -158,7 +158,7 @@ class MemberControllerTest {
                 .readValue(mvcResult.getResponse().getContentAsString(), HashMap.class);
         String token = hashMap.get("token");
 
-        Assertions.assertTrue(JwtTokenUtils.validate(token));
+        Assertions.assertTrue(!JwtTokenUtils.isTokenExpired(token));
     }
 
     @Test

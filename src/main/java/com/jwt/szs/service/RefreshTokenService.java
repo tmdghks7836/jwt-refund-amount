@@ -53,7 +53,7 @@ public class RefreshTokenService {
         log.info("리프레시 토큰의 만료기한과 redis에 저장된 토큰값을 확인합니다.");
 
         Long memberIdByRedis = getMemberIdByRefreshToken(reIssuanceTokenDto.getRefreshToken())
-                .orElseThrow(() -> new CustomRuntimeException(ErrorCode.REFRESH_TOKEN_EXPIRED));
+                .orElseThrow(() -> new CustomRuntimeException(ErrorCode.TOKEN_EXPIRED));
 
         Long memberId = JwtTokenUtils.getId(reIssuanceTokenDto.getRefreshToken());
 

@@ -1,5 +1,6 @@
 package com.jwt.szs.config;
 
+import com.jwt.szs.filter.JwtExceptionFilter;
 import com.jwt.szs.handler.CustomAuthenticationFailureHandler;
 import com.jwt.szs.handler.CustomAuthenticationSuccessHandler;
 import com.jwt.szs.handler.JwtAuthenticationEntryPoint;
@@ -23,6 +24,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     private final JwtTokenFilter jwtTokenFilter;
+
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
@@ -69,6 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(customAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtTokenFilter, CustomAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtTokenFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint);
     }

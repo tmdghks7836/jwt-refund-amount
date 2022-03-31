@@ -5,8 +5,6 @@ import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.core.CustomCallback;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.service.MemberService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
