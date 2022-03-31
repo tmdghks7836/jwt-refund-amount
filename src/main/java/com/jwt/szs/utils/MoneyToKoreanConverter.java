@@ -33,17 +33,18 @@ public class MoneyToKoreanConverter {
             long num = (long) (absMoney / Math.pow(10, maxDivision)) % 10000;
 
             if (num > 0) {
-                sb.append(num + map.get(maxDivision));
+                sb.append(num).append(map.get(maxDivision)).append(" ");
             }
             maxDivision -= 4;
         }
 
         long thousand = (long) (absMoney / Math.pow(10, 3) % 10);
+        long remain = (long) (absMoney % Math.pow(10, 3));
+
         if (thousand > 0) {
-            sb.append(thousand).append("천");
+            sb.append(thousand).append(remain > 0 ? "천 " : "천");
         }
 
-        long remain = (long) (absMoney % Math.pow(10, 3));
         if (remain > 0) {
             sb.append(remain);
         }

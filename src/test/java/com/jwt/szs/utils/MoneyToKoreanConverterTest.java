@@ -16,24 +16,24 @@ class MoneyToKoreanConverterTest {
 
         String convert1 = moneyToKoreanConverter.convert(680150l);
 
-        Assertions.assertEquals("68만150원", convert1);
+        Assertions.assertEquals("68만 150원", convert1);
 
         String convert2 = moneyToKoreanConverter.convert(110002331l);
 
-        Assertions.assertEquals("1억1000만2천331원", convert2);
+        Assertions.assertEquals("1억 1000만 2천 331원", convert2);
 
 
         String convert3 = moneyToKoreanConverter.convert(4318999000l);
 
-        Assertions.assertEquals("43억1899만9천원", convert3);
+        Assertions.assertEquals("43억 1899만 9천원", convert3);
 
         String convert4 = moneyToKoreanConverter.convert(5000043099030l);
 
-        Assertions.assertEquals("5조4309만9천30원", convert4);
+        Assertions.assertEquals("5조 4309만 9천 30원", convert4);
 
         String convert5 = moneyToKoreanConverter.convert(-5000043099030l);
 
-        Assertions.assertEquals("-5조4309만9천30원", convert5);
+        Assertions.assertEquals("-5조 4309만 9천 30원", convert5);
 
         String convert6 = moneyToKoreanConverter.convert(0l);
 
