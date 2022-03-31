@@ -1,8 +1,6 @@
 package com.jwt.szs.api.codetest3o3.config;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.jwt.szs.api.codetest3o3.CodeTest3o3Api;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -26,11 +24,8 @@ public class CodeTest3o3ApiConfig {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-   //     NaverRealEstateTokenInterceptor tokenInterceptor = new NaverRealEstateTokenInterceptor(accessToken);
-
         return new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
-           //     .addInterceptor(tokenInterceptor)
                 .connectTimeout(25, TimeUnit.SECONDS)
                 .writeTimeout(25, TimeUnit.SECONDS)
                 .readTimeout(25, TimeUnit.SECONDS)

@@ -13,9 +13,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberScrapStatusService {
 
-
-
-
     public void pending(Long memberId) {
 
     }

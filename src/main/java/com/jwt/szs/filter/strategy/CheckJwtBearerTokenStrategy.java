@@ -22,7 +22,9 @@ public class CheckJwtBearerTokenStrategy implements CheckJwtTokenStrategy {
 
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getOutputStream()
-                    .write(new ObjectMapper().writeValueAsString(new IssueTokenResponse(token)).getBytes(StandardCharsets.UTF_8)
+                    .write(
+                            new ObjectMapper().writeValueAsString(
+                                    new IssueTokenResponse(token)).getBytes(StandardCharsets.UTF_8)
                     );
 
         } catch (Exception e) {

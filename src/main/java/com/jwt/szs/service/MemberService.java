@@ -137,7 +137,7 @@ public class MemberService implements UserDetailsService {
         employeeIncomeService.create(member, employeeIncomeCreationRequest);
     }
 
-    //TODO 다른 객체에 책임을 부여해야 하는지?
+    //TODO 다른 Class 에 해당 메서드의 책임을 부여해야 하는지?
     private CustomCallback<ScrapResponse> getScrapResponseCallback(Long memberId) {
 
         return new CustomCallback<ScrapResponse>() {
@@ -173,7 +173,9 @@ public class MemberService implements UserDetailsService {
 
                 if (!response.isSuccessful() || scrapResponse.getEmployeeData() == null
                         || scrapResponse.getCalculatedTex() == null || scrapResponse.getIncomeInfo() == null) {
-                    //TODO 회원가입 상태 로그 저장
+                    /*TODO 회원가입 상태 로그 저장
+                        메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
+                    * */
                     return;
                 }
 
@@ -188,6 +190,9 @@ public class MemberService implements UserDetailsService {
                         encodedPassword
                 );
 
+                /** 비동기 호출 시
+                 * 회원가입 성공 후 프론트에서 일정 초마다 polling check를 하며
+                 *  회원가입이 완료될 때까지 기다리는 방법으로 구현 할 수 있을것 같다.. */
                 if (member.getName().equals(workerName) && member.getRegNo().equals(regNo)) {
 
                     memberRepository.save(member);

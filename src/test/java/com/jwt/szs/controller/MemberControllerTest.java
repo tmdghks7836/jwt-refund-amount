@@ -248,7 +248,7 @@ class MemberControllerTest {
                 .andReturn();
 
         ErrorCode errorCode = jsonToErrorCode(mvcResult.getResponse().getContentAsString());
-        Assertions.assertEquals(errorCode, ErrorCode.NOT_YET_EXPIRED_TOKEN);
+        Assertions.assertEquals(ErrorCode.NOT_YET_EXPIRED_TOKEN, errorCode);
     }
 
     private ErrorCode jsonToErrorCode(String json) throws JsonProcessingException {

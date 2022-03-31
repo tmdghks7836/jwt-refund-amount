@@ -63,7 +63,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = refundService.calculateAmount(40000000l, 2000000l);
 
-        Assertions.assertEquals(calculateAmount, 684000l);
+        Assertions.assertEquals(684000l, calculateAmount);
     }
 
     @Test
@@ -71,7 +71,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxLimitStrategy.calculate(33000000l);
 
-        Assertions.assertEquals(calculateAmount, 740000);
+        Assertions.assertEquals(740000, calculateAmount);
     }
 
     @Test
@@ -79,7 +79,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount2 = incomeTaxLimitStrategy.calculate(32999999l);
 
-        Assertions.assertEquals(calculateAmount2, 740000);
+        Assertions.assertEquals(740000, calculateAmount2);
     }
 
     @Test
@@ -87,7 +87,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxLimitStrategy.calculate(40000000l);
 
-        Assertions.assertEquals(calculateAmount, 684000l);
+        Assertions.assertEquals(684000l, calculateAmount);
     }
 
     @Test
@@ -95,7 +95,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxLimitStrategy.calculate(68000000l);
 
-        Assertions.assertEquals(calculateAmount, 660000);
+        Assertions.assertEquals(660000, calculateAmount);
     }
 
     @Test
@@ -103,7 +103,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxLimitStrategy.calculate(100000000l);
 
-        Assertions.assertEquals(calculateAmount, 500000);
+        Assertions.assertEquals(500000, calculateAmount);
     }
 
     @Test
@@ -113,7 +113,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxStrategy.calculate(calculatedTax);
 
-        Assertions.assertEquals(calculateAmount, (long) (calculatedTax * 0.55));
+        Assertions.assertEquals((long) (calculatedTax * 0.55), calculateAmount);
     }
 
     @Test
@@ -123,7 +123,7 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxStrategy.calculate(calculatedTax);
 
-        Assertions.assertEquals(calculateAmount, (long) (calculatedTax * 0.55));
+        Assertions.assertEquals((long) (calculatedTax * 0.55), calculateAmount);
     }
 
     @Test
@@ -131,6 +131,6 @@ class RefundServiceTest2021 {
 
         Long calculateAmount = incomeTaxStrategy.calculate(2000000l);
 
-        Assertions.assertEquals(calculateAmount, 925000);
+        Assertions.assertEquals(925000, calculateAmount);
     }
 }
