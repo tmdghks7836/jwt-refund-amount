@@ -26,8 +26,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtExceptionFilter jwtExceptionFilter;
 
-    private final ReIssuanceAccessTokenFilter reIssuanceAccessTokenFilter;
-
     private final RequestUrlLoggingFilter requestUrlLoggingFilter;
 
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
@@ -75,13 +73,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(customAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtTokenFilter, CustomAuthenticationFilter.class)
-                .addFilterBefore(reIssuanceAccessTokenFilter, JwtTokenFilter.class)
-                .addFilterBefore(jwtExceptionFilter, ReIssuanceAccessTokenFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtTokenFilter.class)
                 .addFilterBefore(requestUrlLoggingFilter, JwtExceptionFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint);
     }
-
 
     private String[] apiPathToAllow() {
 
