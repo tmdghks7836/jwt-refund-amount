@@ -5,6 +5,7 @@ import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.model.dto.jwt.ReIssuanceTokenDto;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.repository.redis.RedisRepository;
+import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

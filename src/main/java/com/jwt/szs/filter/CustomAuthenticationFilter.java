@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.service.RefreshTokenService;
-import com.jwt.szs.service.MemberService;
+import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.utils.HttpUtils;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.extern.slf4j.Slf4j;

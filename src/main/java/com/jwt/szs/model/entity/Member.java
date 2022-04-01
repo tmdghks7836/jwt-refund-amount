@@ -45,5 +45,4 @@ public class Member extends BaseDateTime implements BaseMember {
         this.regNo = regNo;
         this.password = password;
     }
-
 }

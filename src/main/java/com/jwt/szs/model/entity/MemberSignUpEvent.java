@@ -1,7 +1,6 @@
 package com.jwt.szs.model.entity;
 
-import com.jwt.szs.api.codetest3o3.model.type.ScrapRequestStatus;
-import com.jwt.szs.model.dto.EmployeeIncomeCreationRequest;
+import com.jwt.szs.api.codetest3o3.model.type.MemberScrapStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,16 +8,15 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 
 //TODO
 @Entity
-@Table(name = "member_scrap_status")
+@Table(name = "member_sign_up_status")
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberScrapStatus extends BaseDateTime {
+public class MemberSignUpEvent extends BaseDateTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -29,12 +27,9 @@ public class MemberScrapStatus extends BaseDateTime {
 
     //기업명
     @Column(nullable = false)
-    private ScrapRequestStatus status;
-//
-//    @Column(nullable = false)
-//    private LocalDate
+    private MemberScrapStatus status;
 
-    public MemberScrapStatus(Member member, EmployeeIncomeCreationRequest creationRequest) {
+    public MemberSignUpEvent(Member member) {
 
         this.member = member;
 //        this.calculatedTax = creationRequest.getCalculatedTax();

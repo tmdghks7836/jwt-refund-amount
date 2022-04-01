@@ -9,7 +9,7 @@ import com.jwt.szs.model.dto.member.AuthenticationRequest;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
-import com.jwt.szs.service.MemberService;
+import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.service.RefreshTokenService;
 import com.jwt.szs.utils.JwtTokenUtils;
 import io.swagger.annotations.Api;
@@ -51,7 +51,7 @@ public class SzsMemberController {
     @ResponseStatus(HttpStatus.OK)
     public void signUp(@RequestBody @Valid MemberCreationRequest memberCreationRequest) {
 
-        memberService.signUp(memberCreationRequest);
+        memberService.asyncSignUp(memberCreationRequest);
     }
 
     @GetMapping("/me")

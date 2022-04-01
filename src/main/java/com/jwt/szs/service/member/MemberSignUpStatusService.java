@@ -1,6 +1,5 @@
-package com.jwt.szs.service;
+package com.jwt.szs.service.member;
 
-import com.jwt.szs.api.codetest3o3.model.type.ScrapRequestStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

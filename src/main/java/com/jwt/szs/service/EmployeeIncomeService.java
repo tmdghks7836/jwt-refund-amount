@@ -25,12 +25,14 @@ public class EmployeeIncomeService {
     @Transactional
     public void create(Member member, EmployeeIncomeCreationRequest creationRequest) {
 
+        log.info("근로소득 정보를 저장합니다...");
+
         EmployeeIncome employeeIncome = new EmployeeIncome(member, creationRequest);
         employeeIncomeRepository.save(employeeIncome);
     }
 
     //TODO 현재년도도 체크
-    public EmployeeIncomeResponse getByMember(Member member) {
+    public EmployeeIncomeResponse getByMemberId(Member member) {
 
         EmployeeIncome employeeIncome = employeeIncomeRepository.findByMember(member)
                 .orElseThrow(() -> new ResourceNotFoundException("not found member id : " + member.getId()));
