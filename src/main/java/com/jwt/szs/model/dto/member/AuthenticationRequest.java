@@ -17,7 +17,7 @@ import javax.validation.constraints.NotEmpty;
 @AllArgsConstructor
 public class AuthenticationRequest {
 
-    @ApiModelProperty(example = "hone123")
+    @ApiModelProperty(example = "hong123")
     @NotEmpty
     private String userId;
 

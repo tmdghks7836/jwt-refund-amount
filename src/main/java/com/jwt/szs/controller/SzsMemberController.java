@@ -51,7 +51,7 @@ public class SzsMemberController {
     @ResponseStatus(HttpStatus.OK)
     public void signUp(@RequestBody @Valid MemberCreationRequest memberCreationRequest) {
 
-        memberService.asyncSignUp(memberCreationRequest);
+        memberService.signUp(memberCreationRequest);
     }
 
     @GetMapping("/me")

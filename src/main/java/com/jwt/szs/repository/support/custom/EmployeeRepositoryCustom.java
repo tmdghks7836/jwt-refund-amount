@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface EmployeeRepositoryCustom {
 
-    Optional<EmployeeIncome> findByMember(Member member);
+    Optional<EmployeeIncome> findByMemberId(Long memberId);
 }

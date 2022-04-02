@@ -12,7 +12,7 @@ import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.model.mapper.MemberMapper;
 import com.jwt.szs.repository.MemberRepository;
 import com.jwt.szs.service.EmployeeIncomeService;
-import com.jwt.szs.service.event.MemberCallbackEvent;
+import com.jwt.szs.service.callback.MemberCallbackEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -40,6 +40,8 @@ public class MemberService implements UserDetailsService {
     private final EmployeeIncomeService employeeIncomeService;
 
     private final MemberScrapEventService memberScrapEventService;
+
+    private final MemberSignUpEventService memberSignUpEventService;
 
     private final MemberCallbackEvent memberCallbackEvent;
 
@@ -82,7 +84,8 @@ public class MemberService implements UserDetailsService {
         return MemberMapper.INSTANCE.modelToDto(member);
     }
 
-    public void asyncSignUp(MemberCreationRequest creationRequest) {
+    @Transactional
+    public void signUp(MemberCreationRequest creationRequest) {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
@@ -90,9 +93,11 @@ public class MemberService implements UserDetailsService {
             throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
         }
 
-        NameWithRegNoDto nameWithRegNoDto = new NameWithRegNoDto(creationRequest.getName(), creationRequest.getRegNo());
+        memberSignUpEventService.createRequestEvent(
+                creationRequest.getUserId(),
+                creationRequest.getPassword());
 
-        log.info("스크랩 정보 검증 후 회원가입을 진행합니다.");
+        NameWithRegNoDto nameWithRegNoDto = new NameWithRegNoDto(creationRequest.getName(), creationRequest.getRegNo());
 
         codeTest3o3ApiService.getScrapByNameAndRegNo(nameWithRegNoDto, memberCallbackEvent.signUpCallback(creationRequest));
     }
@@ -106,20 +111,13 @@ public class MemberService implements UserDetailsService {
         return MemberMapper.INSTANCE.modelToDto(member);
     }
 
+    @Transactional
     public void scrap(AuthenticationMemberPrinciple principle) {
 
         Member member = memberRepository.findById(principle.getId())
                 .orElseThrow(() -> new MemberNotFoundException(principle.getId()));
 
-        if (employeeIncomeService.isPresent(member)) {
-            throw new AlreadyExistException("스크랩 정보가 이미 존재합니다.");
-        }
-
-        if (memberScrapEventService.isPending(member.getId())) {
-            throw new CustomRuntimeException(ErrorCode.SCRAP_REQUEST_PENDING);
-        }
-
-        memberScrapEventService.pending(member.getId());
+        memberScrapEventService.createRequestEvent(member.getId());
 
         NameWithRegNoDto nameWithRegNoDto = NameWithRegNoDto.builder()
                 .name(member.getName())
@@ -129,11 +127,13 @@ public class MemberService implements UserDetailsService {
         codeTest3o3ApiService.getScrapByNameAndRegNo(nameWithRegNoDto, memberCallbackEvent.getScrapResponseCallback(member.getId()));
     }
 
-    public EmployeeIncomeResponse getRefundInformation(Long id) {
+    public EmployeeIncomeResponse getRefundInformation(Long memberId) {
 
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException(id));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
 
-        return employeeIncomeService.getByMemberId(member);
+        memberScrapEventService.validateHistory(memberId);
+
+        return employeeIncomeService.getByMember(member);
     }
 }

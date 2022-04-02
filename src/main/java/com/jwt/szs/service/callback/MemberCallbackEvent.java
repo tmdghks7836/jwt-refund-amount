@@ -1,4 +1,4 @@
-package com.jwt.szs.service.event;
+package com.jwt.szs.service.callback;
 
 
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
@@ -10,6 +10,7 @@ import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.repository.MemberRepository;
 import com.jwt.szs.service.EmployeeIncomeService;
 import com.jwt.szs.service.member.MemberScrapEventService;
+import com.jwt.szs.service.member.MemberSignUpEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,8 @@ public class MemberCallbackEvent {
 
     private final MemberScrapEventService memberScrapEventService;
 
+    private final MemberSignUpEventService memberSignUpEventService;
+
     @Transactional
     public CustomCallback<ScrapResponse> signUpCallback(MemberCreationRequest creationRequest) {
 
@@ -46,11 +49,15 @@ public class MemberCallbackEvent {
                     /*TODO 회원가입 상태 로그 저장
                         메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
                     * */
+                    memberSignUpEventService.requestFailed(
+                            creationRequest.getUserId(),
+                            creationRequest.getPassword());
                     return;
                 }
 
-                String workerName = scrapResponse.getIncomeInfo().getWorkerName();
-                String regNo = scrapResponse.getIncomeInfo().getRegNo();
+                ScrapResponse.IncomeInfo incomeInfo = scrapResponse.getIncomeInfo();
+                String workerName = incomeInfo.getWorkerName();
+                String regNo = incomeInfo.getRegNo();
                 String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
 
                 /** 비동기 호출 시
@@ -80,6 +87,10 @@ public class MemberCallbackEvent {
         };
     }
 
+    /**
+     * 스크랩 요청 후 응답
+     * */
+    @Transactional
     public CustomCallback<ScrapResponse> getScrapResponseCallback(Long memberId) {
 
         return new CustomCallback<ScrapResponse>() {
@@ -94,7 +105,9 @@ public class MemberCallbackEvent {
                 Member member = memberRepository.findById(memberId)
                         .orElseThrow(() -> new MemberNotFoundException(memberId));
 
-                employeeIncomeService.create(member, employeeIncomeCreationRequest);
+                memberScrapEventService.requestComplete(memberId);
+
+                employeeIncomeService.upsert(member.getId(), employeeIncomeCreationRequest);
             }
 
             @Override

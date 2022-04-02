@@ -25,14 +25,14 @@ public class RedisConfig {
     public void redisServer() throws IOException {
 
         try {
+
             redisServer = RedisServer.builder()
                     .port(redisPort)
                     .build();
-            log.info("redis start : port {} ", redisPort);
+            log.info("redis start : port {} isActive = {} ", redisPort, redisServer.isActive());
             redisServer.start();
-            //TODO 해결방안 찾아야함
         }catch (Exception e){
-            log.error("전체 테스트 진행 시 테스트 하나마다 redis server 가 살아있음에도 계속 시작 되어 에러가 남. 임시로 try catch");
+            log.error("해당 포트가 프로세스로 실행되고 있으면 에러가 남. 임시로 try catch");
             e.printStackTrace();
         }
     }

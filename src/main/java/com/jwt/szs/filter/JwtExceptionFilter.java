@@ -42,6 +42,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 
     public void setErrorResponse(ErrorCode errorCode, HttpServletResponse response, Throwable e) throws IOException {
 
+        e.printStackTrace();
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getOutputStream()

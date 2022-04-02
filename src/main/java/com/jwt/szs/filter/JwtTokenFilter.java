@@ -24,7 +24,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final CheckJwtTokenStrategy checkJwtTokenStrategy;
 
-    private final String[] excludeUris = {"/szs/token/re-issuance"};
+    private final String[] excludeUris = {"/szs/token/re-issuance",
+            "/szs/signup", "/szs/login" };
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {

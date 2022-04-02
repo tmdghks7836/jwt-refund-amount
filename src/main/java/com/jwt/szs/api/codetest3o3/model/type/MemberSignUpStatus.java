@@ -6,24 +6,23 @@ import lombok.Getter;
 import java.util.Arrays;
 
 @Getter
-public enum MemberScrapStatus {
+public enum MemberSignUpStatus {
 
-    NONE("NONE"),
     PENDING("PENDING"),
     COMPLETED("COMPLETED"),
     FAILED("FAILED");
 
     private String code;
 
-    MemberScrapStatus(String code){
+    MemberSignUpStatus(String code){
         this.code = code;
     }
 
-    public static MemberScrapStatus findByCode(String code){
+    public static MemberSignUpStatus findByCode(String code){
 
-        return Arrays.stream(MemberScrapStatus.values())
+        return Arrays.stream(MemberSignUpStatus.values())
                 .filter(scrapRequestStatus -> scrapRequestStatus.getCode().equals(code))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("not foubd MemberScrapStatus. code : " + code));
+                .orElseThrow(() -> new ResourceNotFoundException("not found member signUp status. code : " + code));
     }
 }

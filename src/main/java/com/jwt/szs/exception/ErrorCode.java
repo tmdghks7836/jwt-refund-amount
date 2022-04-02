@@ -24,7 +24,9 @@ public enum ErrorCode {
     PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E0013", "데이터 파싱 에러."),
     SCRAP_REQUEST_PENDING(HttpStatus.BAD_REQUEST, "E0014", "스크랩 요청정보 처리중입니다."),
     VALIDATE_TOKEN_FAILED(HttpStatus.BAD_REQUEST, "E0015", "토큰 인증에 실패하였습니다."),
-    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E0016", "알수 없는 에러입니다.");
+    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E0016", "알수 없는 에러입니다."),
+    SCRAP_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E0017", "스크랩 요청에 실패햐였습니다."),
+    NOT_FOUND_REQUEST_HISTORY(HttpStatus.BAD_REQUEST, "E0018", "요청 이력이 없습니다.");
 
 
     private final HttpStatus httpStatus;
