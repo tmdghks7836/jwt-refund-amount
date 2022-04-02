@@ -39,7 +39,7 @@
   
   #### 기능 구현 방식.
   1. 회원가입, 스크랩 저장에 대해 삼쩜삼으로부터 제공된 api의 데이터로 검증하며, 응답시간 지연에 따라
-     비동기 요청으로 구현되었습니다. 
+     비동기 요청으로 구현하었습니다. 
   3. 비동기 호출시 각 기능에 대한 응답 값을 db에 저장하여 상태관리를 하였습니다. (pending, failed, complete)
   4. spring context에서의 예외처리는 controllerAdvice를 통해 구현하였고, jwtFilter 예외처리는
      jwtExceptionFilter를 jwtFilter 앞에 두어 try catch하였습니다.
