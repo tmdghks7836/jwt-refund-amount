@@ -5,5 +5,5 @@ package com.jwt.szs.service.strategy.base;
  * */
 public interface IncomeTaxLimitStrategy {
 
-    Long calculate(Long paymentAmount);
+    Long calculate(final Long paymentAmount);
 }

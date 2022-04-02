@@ -5,7 +5,7 @@ import com.jwt.szs.service.strategy.base.IncomeTaxStrategy;
 /**
  * 근로소득 세액공제 계산 2021
  */
-public class IncomeTaxStrategy2021 implements IncomeTaxStrategy {
+public class IncomeTaxStrategyV1 implements IncomeTaxStrategy {
 
     public Long calculate(final Long calculatedTax) {
 

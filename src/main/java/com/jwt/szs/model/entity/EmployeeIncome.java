@@ -22,8 +22,8 @@ public class EmployeeIncome extends BaseDateTime {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private Member member;
+    @Column(nullable = false, unique = true)
+    private Long memberId;
 
     //기업명
     @Column(nullable = false)
@@ -49,9 +49,9 @@ public class EmployeeIncome extends BaseDateTime {
     @Column(nullable = false)
     private LocalDate paymentDate;
 
-    public EmployeeIncome(Member member, EmployeeIncomeCreationRequest creationRequest) {
+    public EmployeeIncome(Long memberId, EmployeeIncomeCreationRequest creationRequest) {
 
-        this.member = member;
+        this.memberId = memberId;
         this.calculatedTax = creationRequest.getCalculatedTax();
         this.companyName = creationRequest.getCompanyName();
         this.paymentAmount = creationRequest.getPaymentAmount();
@@ -59,4 +59,16 @@ public class EmployeeIncome extends BaseDateTime {
         this.businessEndDate = creationRequest.getBusinessEndDate();
         this.paymentDate = creationRequest.getPaymentDate();
     }
+
+    public void changeInfo(EmployeeIncomeCreationRequest creationRequest){
+
+        this.memberId = memberId;
+        this.calculatedTax = creationRequest.getCalculatedTax();
+        this.companyName = creationRequest.getCompanyName();
+        this.paymentAmount = creationRequest.getPaymentAmount();
+        this.businessStartDate = creationRequest.getBusinessStartDate();
+        this.businessEndDate = creationRequest.getBusinessEndDate();
+        this.paymentDate = creationRequest.getPaymentDate();
+    }
+
 }

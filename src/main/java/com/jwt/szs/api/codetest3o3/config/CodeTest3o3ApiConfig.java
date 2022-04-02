@@ -1,8 +1,6 @@
 package com.jwt.szs.api.codetest3o3.config;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.jwt.szs.api.codetest3o3.CodeTest3o3Api;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -17,23 +15,23 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CodeTest3o3ApiConfig {
 
-    @Value("${api.url.test-3o3}")
+    @Value("${api.test-3o3.url}")
     private String codeTest3o3Url;
+
+    @Value("${api.test-3o3.timeout}")
+    private Integer test3o3ApiTimeout;
 
     @Bean
     public OkHttpClient okHttpClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-
-   //     NaverRealEstateTokenInterceptor tokenInterceptor = new NaverRealEstateTokenInterceptor(accessToken);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         return new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
-           //     .addInterceptor(tokenInterceptor)
-                .connectTimeout(25, TimeUnit.SECONDS)
-                .writeTimeout(25, TimeUnit.SECONDS)
-                .readTimeout(25, TimeUnit.SECONDS)
+                .connectTimeout(test3o3ApiTimeout, TimeUnit.SECONDS)
+                .writeTimeout(test3o3ApiTimeout, TimeUnit.SECONDS)
+                .readTimeout(test3o3ApiTimeout, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -42,7 +40,6 @@ public class CodeTest3o3ApiConfig {
 
         return new Retrofit.Builder().baseUrl(codeTest3o3Url)
                 .addConverterFactory(GsonConverterFactory.create())
-             //   .addConverterFactory(new BuildingTradeTypeConverterFactory())
                 .client(client).build();
     }
 

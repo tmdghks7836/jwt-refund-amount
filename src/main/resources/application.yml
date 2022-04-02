@@ -36,8 +36,11 @@ spring:
       path: /h2-console
 
 api:
-  url:
-    test-3o3: "https://codetest.3o3.co.kr/"
+  test-3o3:
+    url: "https://codetest.3o3.co.kr/"
+    timeout: 25
+
+
 
 encryption:
   key: iwanttogetin3o3heworlddd34567890

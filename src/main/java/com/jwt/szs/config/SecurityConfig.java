@@ -1,11 +1,11 @@
 package com.jwt.szs.config;
 
+import com.jwt.szs.filter.*;
 import com.jwt.szs.handler.CustomAuthenticationFailureHandler;
 import com.jwt.szs.handler.CustomAuthenticationSuccessHandler;
 import com.jwt.szs.handler.JwtAuthenticationEntryPoint;
-import com.jwt.szs.filter.CustomAuthenticationFilter;
-import com.jwt.szs.filter.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,6 +23,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     private final JwtTokenFilter jwtTokenFilter;
+
+    private final JwtExceptionFilter jwtExceptionFilter;
+
+    private final RequestUrlLoggingFilter requestUrlLoggingFilter;
 
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
@@ -42,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         web.ignoring()
                 .antMatchers(
-                        "/h2-console/**", "/favicon.ico", "/error"
+                        "/h2-console/**", "/error"
                         , "/csrf", "/v3/api-docs", "/configuration/**",
                         "/swagger*/**", "/webjars/**"
                 );
@@ -53,7 +57,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
         httpSecurity
-                // token을 사용하는 방식이기 때문에 csrf를 disable합니다.
                 .csrf().disable()
                 .cors()
                 .and()
@@ -70,6 +73,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(customAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtTokenFilter, CustomAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtTokenFilter.class)
+                .addFilterBefore(requestUrlLoggingFilter, JwtExceptionFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint);
     }

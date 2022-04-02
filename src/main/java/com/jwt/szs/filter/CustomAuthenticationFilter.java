@@ -2,12 +2,13 @@ package com.jwt.szs.filter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jwt.szs.model.dto.member.AuthenticationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
-import com.jwt.szs.service.MemberService;
+import com.jwt.szs.service.RefreshTokenService;
+import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.utils.HttpUtils;
 import com.jwt.szs.utils.JwtTokenUtils;
-import com.jwt.szs.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +25,7 @@ import java.io.IOException;
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     @Autowired
-    private RedisUtil redisUtil;
+    private RefreshTokenService refreshTokenService;
 
     @Autowired
     private MemberService memberService;
@@ -42,13 +43,17 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         String userId = userIdPasswordJson.get("userId").getAsString();
         String password = userIdPasswordJson.get("password").getAsString();
 
-        final MemberResponse memberResponse = memberService.getByUserIdAndPassword(userId, password);
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
+                .userId(userId)
+                .password(password)
+                .build();
+        final MemberResponse memberResponse = memberService.getByUserIdAndPassword(authenticationRequest);
 
         final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
 
         final String refreshJwt = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.REFRESH);
 
-        redisUtil.setDataContainsExpireDate(refreshJwt, memberResponse.getId(), JwtTokenType.REFRESH.getValidationSeconds());
+        refreshTokenService.createRefreshToken(refreshJwt, memberResponse.getId(), JwtTokenType.REFRESH.getValidationSeconds());
 
         request.setAttribute("authenticationToken", token);
 

@@ -8,7 +8,7 @@ plugins {
 
 group = 'com.jwt.szs'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = "1.9"
 
 configurations {
     compileOnly {
@@ -70,3 +70,4 @@ compileQuerydsl {
 sourceSets {
     main.java.srcDir querydslDir
 }
+targetCompatibility = JavaVersion.VERSION_1_9

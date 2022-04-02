@@ -11,9 +11,9 @@ import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.dto.member.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
-import com.jwt.szs.service.MemberService;
+import com.jwt.szs.repository.redis.RedisRepository;
+import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.utils.JwtTokenUtils;
-import com.jwt.szs.utils.RedisUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,6 +41,7 @@ import javax.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -51,7 +54,7 @@ class MemberControllerTest {
     private WebApplicationContext context;
 
     @MockBean
-    private RedisUtil redisUtil;
+    private RedisRepository redisRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -85,7 +88,7 @@ class MemberControllerTest {
         mockMvc.perform(post("/szs/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }
 
@@ -137,9 +140,9 @@ class MemberControllerTest {
         String password = "123";
         MemberResponse memberResponse = MemberResponse.builder().userId(userId).id(id).build();
 
-        Mockito.when(memberService.getByUserIdAndPassword(userId, password))
+        Mockito.when(memberService.getByUserIdAndPassword(any()))
                 .thenReturn(memberResponse);
-        Mockito.when(memberService.loadUserByUsername(userId))
+        Mockito.when(memberService.loadUserByUsername(any()))
                 .thenReturn(
                         new UserDetailsImpl(
                                 id,
@@ -158,7 +161,7 @@ class MemberControllerTest {
                 .readValue(mvcResult.getResponse().getContentAsString(), HashMap.class);
         String token = hashMap.get("token");
 
-        Assertions.assertTrue(JwtTokenUtils.validate(token));
+        Assertions.assertTrue(!JwtTokenUtils.isTokenExpired(token));
     }
 
     @Test
@@ -215,9 +218,9 @@ class MemberControllerTest {
         String token = generateExpiredAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
+        Mockito.when(redisRepository.getData(anyString()))
                 .thenReturn(Optional.of(memberResponse.getId()));
-        Mockito.when(memberService.getById(memberResponse.getId()))
+        Mockito.when(memberService.getById(any()))
                 .thenReturn(memberResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
@@ -237,7 +240,7 @@ class MemberControllerTest {
         String token = generateAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        Mockito.when(redisUtil.<Long>getData(refreshTokenCookie.getValue()))
+        Mockito.when(redisRepository.getData(anyString()))
                 .thenReturn(Optional.of(memberResponse.getId()));
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
@@ -248,7 +251,7 @@ class MemberControllerTest {
                 .andReturn();
 
         ErrorCode errorCode = jsonToErrorCode(mvcResult.getResponse().getContentAsString());
-        Assertions.assertEquals(errorCode, ErrorCode.NOT_YET_EXPIRED_TOKEN);
+        Assertions.assertEquals(ErrorCode.NOT_YET_EXPIRED_TOKEN, errorCode);
     }
 
     private ErrorCode jsonToErrorCode(String json) throws JsonProcessingException {

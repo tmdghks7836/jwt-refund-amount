@@ -21,18 +21,19 @@ public class EmployeeRepositoryImpl extends QuerydslRepositorySupportBasic imple
     }
 
     @Override
-    public Optional<EmployeeIncome> findByMember(Member member) {
+    public Optional<EmployeeIncome> findByMemberId(Long memberId) {
 
         EmployeeIncome employeeIncome = getQueryFactory()
                 .selectFrom(qEmployeeIncome)
                 .where(
-                        memberEq(member)
+                        memberEq(memberId)
                 ).fetchOne();
 
         return Optional.ofNullable(employeeIncome);
     }
 
-    public BooleanExpression memberEq(Member member) {
-        return ObjectUtils.isEmpty(member) ? null : qEmployeeIncome.member.eq(member);
+    public BooleanExpression memberEq(Long memberId) {
+        return memberId != null ? null : qEmployeeIncome.memberId.eq(memberId);
     }
+
 }

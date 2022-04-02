@@ -2,17 +2,17 @@ package com.jwt.szs.service.strategy;
 
 import com.jwt.szs.service.strategy.base.IncomeTaxLimitStrategy;
 
-public class IncomeTaxLimitStrategy2021 implements IncomeTaxLimitStrategy {
+public class IncomeTaxLimitStrategyV1 implements IncomeTaxLimitStrategy {
 
-    final Long minPayment3300 = 33000000l;
+    private final Long minPayment3300 = 33000000l;
 
-    final Long maxPayment7000 = 70000000l;
+    private final Long maxPayment7000 = 70000000l;
 
-    final Long million74 = 740000l;
+    private final Long million74 = 740000l;
 
-    final Long million66 = 660000l;
+    private final Long million66 = 660000l;
 
-    final Long million50 = 500000l;
+    private final Long million50 = 500000l;
 
     @Override
     public Long calculate(final Long paymentAmount) {

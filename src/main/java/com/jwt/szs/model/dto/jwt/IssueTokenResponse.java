@@ -1,4 +1,4 @@
-package com.jwt.szs.model.dto;
+package com.jwt.szs.model.dto.jwt;
 
 import lombok.*;
 

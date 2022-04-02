@@ -34,16 +34,16 @@ public class AppConfig {
 
     @Bean
     public IncomeTaxStrategy incomeTaxStrategy(){
-        return new IncomeTaxStrategy2021();
+        return new IncomeTaxStrategyV1();
     }
 
     @Bean
     public IncomeTaxLimitStrategy incomeTaxLimitStrategy(){
-        return new IncomeTaxLimitStrategy2021();
+        return new IncomeTaxLimitStrategyV1();
     }
 
     @Bean
     public RefundStrategy refundStrategy(){
-        return new RefundStrategy2021();
+        return new RefundStrategyV1();
     }
 }

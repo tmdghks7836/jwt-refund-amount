@@ -106,23 +106,21 @@ public class JwtTokenUtils {
     }
 
     public static boolean validate(String token) {
+
         try {
+            if (!StringUtils.hasText(token)) {
+                return false;
+            }
+
             parseClaims(token);
-            return true;
-        } catch (SignatureException ex) {
-            log.error("Invalid JWT signature - {}", ex.getMessage());
-        } catch (MalformedJwtException ex) {
-            log.error("Invalid JWT token - {}", ex.getMessage());
-        } catch (ExpiredJwtException ex) {
-            log.error("Expired JWT token - {}", ex.getMessage());
-        } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported JWT token - {}", ex.getMessage());
-        } catch (IllegalArgumentException ex) {
-            log.error("JWT claims string is empty - {}", ex.getMessage());
-        } catch (JwtException ex) {
-            log.error("JWT error - {}", ex.getMessage());
+
+        } catch (JwtException e) {
+
+            log.error("jwt 인증에 실패하였습니다. {}", e.getMessage());
+            throw e;
         }
-        return false;
+
+        return true;
     }
 
     /**
