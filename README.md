@@ -33,8 +33,8 @@
 
   #### JWT 인증.
   1. aceess token이 만료되면 httponly로 저장된 refresh token cookie로 재발급 요청합니다. 
-  2. access token 이 만료되기 전, 재발급 요청을 하면 redis에 저장되어 있는 refresh token이 폐기됩니다. (jwt token의 폐기를 직접 할 수 없으므로 redis에 저장하여 .)
-  3. login 기능은 spring security에서 관리되며 각 플로우에 대한 핸들러를 구현하였습니다. 
+  2. access token 이 만료되기 전, 재발급 요청을 하면 redis에 저장되어 있는 refresh token이 폐기됩니다. (jwt token의 폐기를 직접 할 수 없으므로 redis에 저장하여 관리.)
+  3. login 기능은 spring security에서 관리되며 각 성공 실패에 대한 handler가 있습니다. 
   
   #### 기능 구현 방식.
   1. 회원가입, 스크랩 저장에 대해 삼쩜삼으로부터 제공된 api의 데이터로 검증하며, 응답시간 지연에 따라 비동기 요청으로 구현되었습니다. 
