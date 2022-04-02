@@ -42,25 +42,20 @@ public class MemberSignUpEventService {
         MemberSignUpEvent memberSignUpEvent = new MemberSignUpEvent(
                 userIdPassword.getUserId(),
                 encodePassword,
-                MemberSignUpStatus.PENDING,
-                "회원가입이 진행중입니다.");
+                MemberSignUpStatus.PENDING);
 
         signUpEventRepository.save(memberSignUpEvent);
     }
 
     public void requestComplete(HasUserIdPassword userIdPassword) {
 
-        String encodePassword = passwordEncoder.encode(userIdPassword.getPassword());
         log.info("화원가입 요청 이력을 생성합니다.");
-        log.info("요청 패스워드 : {}", userIdPassword.getPassword());
-        log.info("encode 패스워드 : {}", encodePassword);
-
+        String encodePassword = passwordEncoder.encode(userIdPassword.getPassword());
 
         MemberSignUpEvent memberSignUpEvent = new MemberSignUpEvent(
                 userIdPassword.getUserId(),
                 encodePassword,
-                MemberSignUpStatus.COMPLETED,
-                "회원가입 완료");
+                MemberSignUpStatus.COMPLETED);
 
         signUpEventRepository.save(memberSignUpEvent);
     }
@@ -69,8 +64,6 @@ public class MemberSignUpEventService {
 
         log.info("화원가입 요청 실패 이력을 생성합니다.");
         String encodePassword = passwordEncoder.encode(userIdPassword.getPassword());
-        log.info("요청 패스워드 : {}", userIdPassword.getPassword());
-        log.info("encode 패스워드 : {}", encodePassword);
 
         MemberSignUpEvent memberSignUpEvent = new MemberSignUpEvent(
                 userIdPassword.getUserId(),

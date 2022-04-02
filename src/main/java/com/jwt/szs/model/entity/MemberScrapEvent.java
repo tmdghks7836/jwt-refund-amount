@@ -14,7 +14,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "member_scrap_event", indexes = {
-        @Index(name = "member_id_index", columnList = "memberId, createdAt")
+        @Index(name = "member_scrap_event_index", columnList = "memberId, createdAt")
 })
 @Getter
 @Setter(AccessLevel.PROTECTED)

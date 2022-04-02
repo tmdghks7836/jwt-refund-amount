@@ -85,7 +85,7 @@ public class MemberCallbackEvent {
             public void onFailure (Call call, Throwable t){
                 super.onFailure(call, t);
 
-                memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다.");
+                memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다. " + t.getMessage());
                 return;
             }
         };
@@ -103,6 +103,13 @@ public class MemberCallbackEvent {
             public void onResponse(Call<ScrapResponse> call, Response<ScrapResponse> response) {
                 super.onResponse(call, response);
 
+                if (!response.isSuccessful()) {
+
+                    log.error("스크랩 요청 실패 memberId : {}, message : {}", memberId, response.message());
+                    memberScrapEventService.requestFailed(memberId);
+                    return;
+                }
+
                 ScrapResponse scrapResponse = response.body();
                 EmployeeIncomeCreationRequest employeeIncomeCreationRequest = new EmployeeIncomeCreationRequest(scrapResponse);
 
@@ -118,7 +125,7 @@ public class MemberCallbackEvent {
             public void onFailure(Call<ScrapResponse> call, Throwable t) {
                 super.onFailure(call, t);
 
-                log.error("스크랩 요청 실패 memberId : {}", memberId);
+                log.error("스크랩 요청 실패 memberId : {}, message : {}", memberId, t.getMessage());
                 memberScrapEventService.requestFailed(memberId);
             }
         };

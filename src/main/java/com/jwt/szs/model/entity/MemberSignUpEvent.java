@@ -10,8 +10,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "member_sign_up_evet", indexes = {
-        @Index(name = "member_id_index", columnList = "createdAt, userId")
+@Table(name = "member_sign_up_event", indexes = {
+        @Index(name = "member_sign_up_event_index", columnList = "createdAt, userId")
 })
 @Getter
 @Setter(AccessLevel.PROTECTED)
@@ -34,6 +34,11 @@ public class MemberSignUpEvent extends BaseDateTime {
 
     @Column
     private String message;
+
+    public MemberSignUpEvent(String userId, String password, MemberSignUpStatus status) {
+
+        this(userId, password, status, null);
+    }
 
     public MemberSignUpEvent(String userId, String password, MemberSignUpStatus status, String message) {
 
