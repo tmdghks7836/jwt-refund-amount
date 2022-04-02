@@ -1,4 +1,4 @@
-# szs 유저 환급액 조회 API
+# SoS 유저 환급액 조회 API
 
 ------------
 #  dependencies
