@@ -1,13 +1,10 @@
-# jwt-redis
+# szs test 
 
 ## jwt 액세스토큰 재발급 요청
  기존에 가지고있는 액세스토큰 기한이 지나야 재발급을 받을 수 있습니다. 
  
  
- 
- 
-작성  예제
-# 공급 도서 API
+# 유저 API
 
 ------------
 #  dependencies
@@ -18,17 +15,22 @@
   + springfox-swagger
   + h2database
   + mapstruct
+  + spring-security
+  + embedded-redis (refresh token 저장)
+  + retrofit2
+  + okhttp3:logging-interceptor (retrofit 요청 시 로그 확인)
 ------------
 
 # swagger API
 
-+  /swagger-ui.html
++  /swagger-ui/index.html
 
-## 계약 업체, 공급 도서 API
-### Contractor Controller
+## 유저 API
+###  SzsMemberController
 
-  + GET /api/v1/contractors 업체 목록 조회
-  + GET /api/v1/contractors/{contractorId}/supplies/books 계약 업체별 공급된 도서 조회
+  + GET /szs/login 유저 로그인
+  + GET /szs/me
+  + 
   + GET /api/v1/contractors/supplies 공급 도서 목록 조회(공급 내역, 도서 상세 내역 포함)
   + GET /api/v1/contractors/supplies/{supplyId} 공급 도서 상세 조회(공급 내역, 도서 상세 내역 포함)
   + GET /api/v1/contractors/supplies/books 공급된 도서 중 특정 저자가 쓴 도서를 조회
