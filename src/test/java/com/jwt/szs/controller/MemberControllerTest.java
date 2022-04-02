@@ -185,23 +185,6 @@ class MemberControllerTest {
     }
 
     @Test
-    public void 토큰검증() throws Exception {
-
-        String token = generateAccessToken(
-                SimpleMember.builder()
-                        .id(1l)
-                        .name("홍길동")
-                        .userId("tmdghks").build()
-        );
-
-        mockMvc.perform(get("/api/test/token")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-    }
-
-    @Test
     public void 토큰검증_실패_토큰없이전송() throws Exception {
 
         mockMvc.perform(get("/api/test/token")
