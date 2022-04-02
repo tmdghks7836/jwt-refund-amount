@@ -48,7 +48,7 @@ public class MemberCallbackEvent {
 
                 if (!response.isSuccessful() || scrapResponse.getEmployeeData() == null
                         || scrapResponse.getCalculatedTex() == null || scrapResponse.getIncomeInfo() == null) {
-                    /*TODO 회원가입 상태 로그 저장
+                    /** 회원가입 상태 로그 저장
                         메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
                     * */
                     memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답값이 잘못되었습니다.");

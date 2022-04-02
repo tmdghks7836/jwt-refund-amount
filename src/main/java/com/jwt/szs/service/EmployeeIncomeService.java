@@ -39,7 +39,6 @@ public class EmployeeIncomeService {
                 });
     }
 
-    //TODO 현재년도도 체크
     public EmployeeIncomeResponse getByMember(Member member) {
 
         EmployeeIncome employeeIncome = employeeIncomeRepository.findByMemberId(member.getId())
@@ -57,7 +56,6 @@ public class EmployeeIncomeService {
                 .build();
     }
 
-    //TODO 현재 년도도 체크
     public Boolean isPresent(Long memberId) {
 
         return employeeIncomeRepository.findByMemberId(memberId).isPresent();

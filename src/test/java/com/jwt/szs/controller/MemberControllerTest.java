@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,7 @@ import javax.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -138,14 +140,9 @@ class MemberControllerTest {
         String password = "123";
         MemberResponse memberResponse = MemberResponse.builder().userId(userId).id(id).build();
 
-        AuthenticationRequest request = AuthenticationRequest.builder()
-                .userId(userId)
-                .password(password)
-                .build();
-
-        Mockito.when(memberService.getByUserIdAndPassword(request))
+        Mockito.when(memberService.getByUserIdAndPassword(any()))
                 .thenReturn(memberResponse);
-        Mockito.when(memberService.loadUserByUsername(userId))
+        Mockito.when(memberService.loadUserByUsername(any()))
                 .thenReturn(
                         new UserDetailsImpl(
                                 id,
@@ -221,9 +218,9 @@ class MemberControllerTest {
         String token = generateExpiredAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        Mockito.when(redisRepository.getData(refreshTokenCookie.getValue()))
+        Mockito.when(redisRepository.getData(anyString()))
                 .thenReturn(Optional.of(memberResponse.getId()));
-        Mockito.when(memberService.getById(memberResponse.getId()))
+        Mockito.when(memberService.getById(any()))
                 .thenReturn(memberResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
@@ -243,7 +240,7 @@ class MemberControllerTest {
         String token = generateAccessToken(memberResponse);
         Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
 
-        Mockito.when(redisRepository.getData(refreshTokenCookie.getValue()))
+        Mockito.when(redisRepository.getData(anyString()))
                 .thenReturn(Optional.of(memberResponse.getId()));
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")

@@ -61,9 +61,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 authenticationMemberPrinciple.getAuthorities()
         );
 
-//        //TODO 필요한 코드인지?
-//        authentication.setDetails(userDetails);
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
