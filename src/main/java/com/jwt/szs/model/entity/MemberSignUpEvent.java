@@ -1,6 +1,5 @@
 package com.jwt.szs.model.entity;
 
-import com.jwt.szs.api.codetest3o3.model.type.MemberScrapStatus;
 import com.jwt.szs.api.codetest3o3.model.type.MemberSignUpStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,9 +9,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
-//TODO
 @Entity
-@Table(name = "member_sign_up_evet")
+@Table(name = "member_sign_up_evet", indexes = {
+        @Index(name = "member_id_index", columnList = "createdAt, userId")
+})
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -32,10 +32,25 @@ public class MemberSignUpEvent extends BaseDateTime {
     @Column(nullable = false)
     private MemberSignUpStatus status;
 
-    public MemberSignUpEvent(String userId, String password) {
+    @Column
+    private String message;
+
+    public MemberSignUpEvent(String userId, String password, MemberSignUpStatus status, String message) {
 
         this.userId = userId;
         this.password = password;
-        this.status = MemberSignUpStatus.PENDING;
+        this.status = status;
+        this.message = message;
+
+    }
+
+    public Boolean isPending() {
+
+        return MemberSignUpStatus.PENDING.equals(status);
+    }
+
+    public Boolean isFailed() {
+
+        return MemberSignUpStatus.FAILED.equals(status);
     }
 }

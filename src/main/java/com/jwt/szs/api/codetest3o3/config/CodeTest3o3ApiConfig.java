@@ -15,8 +15,11 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CodeTest3o3ApiConfig {
 
-    @Value("${api.url.test-3o3}")
+    @Value("${api.test-3o3.url}")
     private String codeTest3o3Url;
+
+    @Value("${api.test-3o3.timeout}")
+    private Integer test3o3ApiTimeout;
 
     @Bean
     public OkHttpClient okHttpClient() {
@@ -26,9 +29,9 @@ public class CodeTest3o3ApiConfig {
 
         return new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
-                .connectTimeout(25, TimeUnit.SECONDS)
-                .writeTimeout(25, TimeUnit.SECONDS)
-                .readTimeout(25, TimeUnit.SECONDS)
+                .connectTimeout(test3o3ApiTimeout, TimeUnit.SECONDS)
+                .writeTimeout(test3o3ApiTimeout, TimeUnit.SECONDS)
+                .readTimeout(test3o3ApiTimeout, TimeUnit.SECONDS)
                 .build();
     }
 

@@ -11,9 +11,11 @@ import javax.persistence.*;
 
 /**
  * 멤버 스크랩 요청 상태정보를 관리합니다.
- * */
+ */
 @Entity
-@Table(name = "member_scrap_event")
+@Table(name = "member_scrap_event", indexes = {
+        @Index(name = "member_id_index", columnList = "memberId, createdAt")
+})
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -36,7 +38,7 @@ public class MemberScrapEvent extends BaseDateTime {
         this.status = memberScrapStatus;
     }
 
-    public Boolean isPending(){
+    public Boolean isPending() {
 
         return status.equals(MemberScrapStatus.PENDING);
     }
@@ -46,12 +48,12 @@ public class MemberScrapEvent extends BaseDateTime {
         return status.equals(MemberScrapStatus.FAILED);
     }
 
-    public void complete(){
+    public void changeComplete() {
 
         status = MemberScrapStatus.COMPLETED;
     }
 
-    public void failed() {
+    public void changeFailed() {
 
         status = MemberScrapStatus.FAILED;
     }

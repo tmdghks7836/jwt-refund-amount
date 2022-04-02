@@ -13,26 +13,24 @@ import java.util.Optional;
 @Repository
 public class MemberScrapEventRepositoryImpl extends QuerydslRepositorySupportBasic implements MemberScrapEventRepositoryCustom {
 
-    private QMemberScrapEvent memberScrapEvent = QMemberScrapEvent.memberScrapEvent;
+    private QMemberScrapEvent qMemberScrapEvent = QMemberScrapEvent.memberScrapEvent;
 
     public MemberScrapEventRepositoryImpl() {
         super(MemberScrapEvent.class);
     }
 
     @Override
-    public Optional<MemberScrapEvent> findByMemberIdLately(Long memberId) {
+    public Optional<MemberScrapEvent> findByMemberId(Long memberId) {
 
         MemberScrapEvent memberScrapEvent = getQueryFactory()
-                .selectFrom(this.memberScrapEvent)
+                .selectFrom(qMemberScrapEvent)
                 .where(
-                        memberIdEq(memberId)
-                ).orderBy(this.memberScrapEvent.createdAt.desc())
+                        qMemberScrapEvent.memberId.eq(memberId)
+                )
+                .orderBy(qMemberScrapEvent.createdAt.desc())
                 .fetchFirst();
 
         return Optional.ofNullable(memberScrapEvent);
     }
 
-    public BooleanExpression memberIdEq(Long memberId) {
-        return memberId != null ? null : memberScrapEvent.memberId.eq(memberId);
-    }
 }

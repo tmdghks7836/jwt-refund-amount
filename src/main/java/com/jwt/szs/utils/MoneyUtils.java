@@ -24,13 +24,16 @@ public class MoneyUtils {
         }
 
         StringBuilder sb = new StringBuilder();
-
+        boolean appendStarted = false;
         while (maxDivision > 0) {
 
             long num = (long) (absMoney / Math.pow(10, maxDivision)) % 10000;
 
             if (num > 0) {
-                sb.append(num).append(map.get(maxDivision)).append(" ");
+
+                appendSpace(appendStarted, sb);
+                sb.append(num).append(map.get(maxDivision));
+                appendStarted = true;
             }
             maxDivision -= 4;
         }
@@ -39,10 +42,14 @@ public class MoneyUtils {
         long remain = (long) (absMoney % Math.pow(10, 3));
 
         if (thousand > 0) {
-            sb.append(thousand).append(remain > 0 ? "천 " : "천");
+
+            appendSpace(appendStarted, sb);
+            sb.append(thousand).append("천");
         }
 
         if (remain > 0) {
+
+            appendSpace(appendStarted, sb);
             sb.append(remain);
         }
 
@@ -50,5 +57,12 @@ public class MoneyUtils {
         String result = money < 0 ? "-" + sb : sb.toString();
         log.info(result);
         return result;
+    }
+
+    private static void appendSpace(Boolean appendStarted, StringBuilder sb){
+
+        if(appendStarted){
+            sb.append(" ");
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.jwt.szs.service.member;
 import com.jwt.szs.api.codetest3o3.model.NameWithRegNoDto;
 import com.jwt.szs.api.service.CodeTest3o3ApiService;
 import com.jwt.szs.exception.*;
+import com.jwt.szs.model.base.HasUserIdPassword;
 import com.jwt.szs.model.dto.EmployeeIncomeResponse;
 import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
@@ -49,13 +50,9 @@ public class MemberService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(final String userId) {
 
-        Optional<Member> memberOptional = memberRepository.findByUserId(userId);
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new MemberNotFoundException(userId));
 
-        if (!memberOptional.isPresent()) {
-            throw new RuntimeException();
-        }
-
-        Member member = memberOptional.get();
         return new UserDetailsImpl(member.getId(), member.getUserId(), member.getPassword());
     }
 
@@ -67,17 +64,22 @@ public class MemberService implements UserDetailsService {
         return MemberMapper.INSTANCE.modelToDto(member);
     }
 
-    public MemberResponse getByUserIdAndPassword(String userId, String password) {
+    public MemberResponse getByUserIdAndPassword(HasUserIdPassword userIdPassword) {
 
-        Optional<Member> memberOptional = memberRepository.findByUserId(userId);
+        Optional<Member> memberOptional = memberRepository.findByUserId(userIdPassword.getUserId());
+
+        memberSignUpEventService.validateHistoryInSeconds(userIdPassword);
 
         if (!memberOptional.isPresent()) {
-            throw new UsernameNotFoundException(userId + " not found");
+            /**
+             * authenticationFailureHandler 로 전달 시 AuthenticationException 로 throw
+             * */
+            throw new UsernameNotFoundException(userIdPassword.getUserId() + " not found");
         }
 
         Member member = memberOptional.get();
 
-        if (!passwordEncoder.matches(password, member.getPassword())) {
+        if (!passwordEncoder.matches(userIdPassword.getPassword(), member.getPassword())) {
             throw new BadCredentialsException(ErrorCode.NOT_MATCHED_PASSWORD.getDescription());
         }
 
@@ -89,13 +91,12 @@ public class MemberService implements UserDetailsService {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
-        if (memberOptional.isPresent()) {
+        if (memberOptional.isPresent()
+                || memberSignUpEventService.isSomeOneRequestPending(creationRequest)) {
             throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
         }
 
-        memberSignUpEventService.createRequestEvent(
-                creationRequest.getUserId(),
-                creationRequest.getPassword());
+        memberSignUpEventService.createRequestEvent(creationRequest);
 
         NameWithRegNoDto nameWithRegNoDto = new NameWithRegNoDto(creationRequest.getName(), creationRequest.getRegNo());
 

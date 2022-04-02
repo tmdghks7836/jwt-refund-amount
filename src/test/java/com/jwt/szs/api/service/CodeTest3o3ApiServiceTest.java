@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import retrofit2.Call;
@@ -24,6 +25,9 @@ class CodeTest3o3ApiServiceTest {
 
     @MockBean
     private MemberService memberService;
+
+    @Value("${api.test-3o3.timeout}")
+    private Integer test3o3ApiTimeout;
 
     @Test
     public void CodeTestApi_요청응답시간테스트() throws InterruptedException {
@@ -44,7 +48,7 @@ class CodeTest3o3ApiServiceTest {
         Mockito.when(memberService.getById(memberId))
                 .thenReturn(memberResponse);
 
-        final int timeoutSec = 21;
+        final int timeoutSec = test3o3ApiTimeout;
         final Boolean[] whetherToRespond = new Boolean[1];
         whetherToRespond[0] = false;
 

@@ -42,12 +42,18 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 
     public void setErrorResponse(ErrorCode errorCode, HttpServletResponse response, Throwable e) throws IOException {
 
+        String message = e.getMessage();
+
+        if(e instanceof CustomRuntimeException){
+            message = ((CustomRuntimeException) e).getReason();
+        }
+
         e.printStackTrace();
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getOutputStream()
                 .write(objectMapper.writeValueAsString(
-                                ErrorResponse.getByErrorCode(errorCode, e.getMessage())
+                                ErrorResponse.getByErrorCode(errorCode, message)
                         ).getBytes(StandardCharsets.UTF_8)
                 );
     }

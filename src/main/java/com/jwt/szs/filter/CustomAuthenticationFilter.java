@@ -2,6 +2,7 @@ package com.jwt.szs.filter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jwt.szs.model.dto.member.AuthenticationRequest;
 import com.jwt.szs.model.dto.member.MemberResponse;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.service.RefreshTokenService;
@@ -42,7 +43,11 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         String userId = userIdPasswordJson.get("userId").getAsString();
         String password = userIdPasswordJson.get("password").getAsString();
 
-        final MemberResponse memberResponse = memberService.getByUserIdAndPassword(userId, password);
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
+                .userId(userId)
+                .password(password)
+                .build();
+        final MemberResponse memberResponse = memberService.getByUserIdAndPassword(authenticationRequest);
 
         final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
 

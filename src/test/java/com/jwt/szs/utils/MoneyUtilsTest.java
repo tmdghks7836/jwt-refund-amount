@@ -35,5 +35,8 @@ class MoneyUtilsTest {
 
         Assertions.assertEquals("0원", convert6);
 
+        String convert7 = MoneyUtils.convertKorean(10000l);
+
+        Assertions.assertEquals("1만원", convert7);
     }
 }

@@ -45,33 +45,33 @@ public class MemberScrapEventService {
         MemberScrapEvent memberScrapEvent = memberScrapEventOptional.get();
 
         if (memberScrapEvent.isPending()) {
-            throw new CustomRuntimeException(ErrorCode.SCRAP_REQUEST_PENDING);
+            throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING);
         }
 
         if (memberScrapEvent.isFailed()) {
-            throw new CustomRuntimeException(ErrorCode.SCRAP_REQUEST_FAILED);
+            throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED);
         }
     }
 
     @Transactional
     public void requestComplete(Long memberId) {
 
-        MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberIdLately(memberId).orElseThrow(() -> new ResourceNotFoundException());
+        MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberId(memberId).orElseThrow(() -> new ResourceNotFoundException());
 
-        memberScrapEvent.complete();
+        memberScrapEvent.changeComplete();
     }
 
     public Optional<MemberScrapEvent> get(Long memberId) {
 
-        Optional<MemberScrapEvent> scrapEventOptional = memberScrapEventRepository.findByMemberIdLately(memberId);
+        Optional<MemberScrapEvent> scrapEventOptional = memberScrapEventRepository.findByMemberId(memberId);
 
         return scrapEventOptional;
     }
 
     public void requestFailed(Long memberId) {
 
-        MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberIdLately(memberId).orElseThrow(() -> new ResourceNotFoundException());
+        MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberId(memberId).orElseThrow(() -> new ResourceNotFoundException());
 
-        memberScrapEvent.failed();
+        memberScrapEvent.changeFailed();
     }
 }

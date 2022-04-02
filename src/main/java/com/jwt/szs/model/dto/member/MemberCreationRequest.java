@@ -1,5 +1,6 @@
 package com.jwt.szs.model.dto.member;
 
+import com.jwt.szs.model.base.HasUserIdPassword;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberCreationRequest {
+public class MemberCreationRequest implements HasUserIdPassword {
 
     @ApiModelProperty(example = "hong123")
     @NotEmpty

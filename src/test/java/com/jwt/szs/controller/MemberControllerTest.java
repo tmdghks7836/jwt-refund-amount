@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
@@ -137,7 +138,12 @@ class MemberControllerTest {
         String password = "123";
         MemberResponse memberResponse = MemberResponse.builder().userId(userId).id(id).build();
 
-        Mockito.when(memberService.getByUserIdAndPassword(userId, password))
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .userId(userId)
+                .password(password)
+                .build();
+
+        Mockito.when(memberService.getByUserIdAndPassword(request))
                 .thenReturn(memberResponse);
         Mockito.when(memberService.loadUserByUsername(userId))
                 .thenReturn(

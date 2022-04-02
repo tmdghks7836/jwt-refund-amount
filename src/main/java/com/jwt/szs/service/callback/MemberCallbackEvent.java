@@ -12,12 +12,14 @@ import com.jwt.szs.service.EmployeeIncomeService;
 import com.jwt.szs.service.member.MemberScrapEventService;
 import com.jwt.szs.service.member.MemberSignUpEventService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import retrofit2.Call;
 import retrofit2.Response;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,9 +51,7 @@ public class MemberCallbackEvent {
                     /*TODO 회원가입 상태 로그 저장
                         메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
                     * */
-                    memberSignUpEventService.requestFailed(
-                            creationRequest.getUserId(),
-                            creationRequest.getPassword());
+                    memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답값이 잘못되었습니다.");
                     return;
                 }
 
@@ -61,35 +61,39 @@ public class MemberCallbackEvent {
                 String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
 
                 /** 비동기 호출 시
-                 * 회원가입 성공 후 프론트에서 일정 초마다 polling check를 하며
+                 * 회원가입진행 시 응답이 올떄까지 프론트에서 일정 초마다 polling check를 하며
                  *  회원가입이 완료될 때까지 기다리는 방법으로 구현 할 수 있을것 같다.. */
-                if (creationRequest.getName().equals(workerName)
-                        && creationRequest.getRegNo().equals(regNo)) {
+                if (!(creationRequest.getName().equals(workerName)
+                        && creationRequest.getRegNo().equals(regNo))) {
 
-                    Member member = new Member(
-                            creationRequest.getUserId(),
-                            creationRequest.getName(),
-                            creationRequest.getRegNo(),
-                            encodedPassword
-                    );
-
-                    memberRepository.save(member);
+                    memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼api의 이름과 주민번호가 맞지 않습니다.");
+                    return;
                 }
+
+                Member member = new Member(
+                        creationRequest.getUserId(),
+                        creationRequest.getName(),
+                        creationRequest.getRegNo(),
+                        encodedPassword
+                );
+
+                memberSignUpEventService.requestComplete(creationRequest);
+                memberRepository.save(member);
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
+            public void onFailure (Call call, Throwable t){
                 super.onFailure(call, t);
 
-                //TODO 회원가입 상태 로그 저장
+                memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다.");
                 return;
             }
         };
-    }
+}
 
     /**
      * 스크랩 요청 후 응답
-     * */
+     */
     @Transactional
     public CustomCallback<ScrapResponse> getScrapResponseCallback(Long memberId) {
 
@@ -114,6 +118,7 @@ public class MemberCallbackEvent {
             public void onFailure(Call<ScrapResponse> call, Throwable t) {
                 super.onFailure(call, t);
 
+                log.error("스크랩 요청 실패 memberId : {}", memberId);
                 memberScrapEventService.requestFailed(memberId);
             }
         };
