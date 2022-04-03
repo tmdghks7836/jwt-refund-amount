@@ -22,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 public class EncryptionFieldConverter implements AttributeConverter<String, String> {
 
-    @Value("${encryption.key}")
+    @Value("${encryption.key.member-regno}")
     private String encryptionKey;
 
     private static final String encryptAlgorithm = "AES";

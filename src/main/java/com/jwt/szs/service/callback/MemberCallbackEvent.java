@@ -3,7 +3,6 @@ package com.jwt.szs.service.callback;
 
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.core.CustomCallback;
-import com.jwt.szs.exception.MemberNotFoundException;
 import com.jwt.szs.model.dto.EmployeeIncomeCreationRequest;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.entity.Member;
@@ -16,18 +15,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+
+/**
+ * 비동기 호출시 @transactional 동작하지 않음.
+ * call.enqueue( new okhttp3.Callback() 으로 작동함
+ * */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class MemberCallbackEvent {
 
     private final PasswordEncoder passwordEncoder;
-
-    private final MemberRepository memberRepository;
 
     private final EmployeeIncomeService employeeIncomeService;
 
@@ -35,7 +39,10 @@ public class MemberCallbackEvent {
 
     private final MemberSignUpEventService memberSignUpEventService;
 
-    @Transactional
+    private final TransactionTemplate transactionTemplate;
+
+    private final MemberRepository memberRepository;
+
     public CustomCallback<ScrapResponse> signUpCallback(MemberCreationRequest creationRequest) {
 
         return new CustomCallback<ScrapResponse>() {
@@ -49,8 +56,8 @@ public class MemberCallbackEvent {
                 if (!response.isSuccessful() || scrapResponse.getEmployeeData() == null
                         || scrapResponse.getCalculatedTex() == null || scrapResponse.getIncomeInfo() == null) {
                     /** 회원가입 상태 로그 저장
-                        메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
-                    * */
+                     메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
+                     * */
                     memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답값이 잘못되었습니다.");
                     return;
                 }
@@ -58,7 +65,6 @@ public class MemberCallbackEvent {
                 ScrapResponse.IncomeInfo incomeInfo = scrapResponse.getIncomeInfo();
                 String workerName = incomeInfo.getWorkerName();
                 String regNo = incomeInfo.getRegNo();
-                String encodedPassword = passwordEncoder.encode(creationRequest.getPassword());
 
                 /** 비동기 호출 시
                  * 회원가입진행 시 응답이 올떄까지 프론트에서 일정 초마다 polling check를 하며
@@ -74,27 +80,41 @@ public class MemberCallbackEvent {
                         creationRequest.getUserId(),
                         creationRequest.getName(),
                         creationRequest.getRegNo(),
-                        encodedPassword
+                        passwordEncoder.encode(creationRequest.getPassword())
                 );
 
-                memberSignUpEventService.requestComplete(creationRequest);
-                memberRepository.save(member);
+
+                AtomicBoolean isTransactionFailed = new AtomicBoolean(false);
+                transactionTemplate.executeWithoutResult(transactionStatus -> {
+                    try {
+                        memberSignUpEventService.requestComplete(creationRequest);
+                        memberRepository.saveAndFlush(member);
+                    } catch (Throwable e) {
+                        //TODO 저장 실패 시 케이스 별로 메세지 남길 필요가 있다.
+                        isTransactionFailed.set(true);
+                        e.printStackTrace();
+                        transactionStatus.setRollbackOnly();
+                    }
+                });
+
+                if(isTransactionFailed.get()){
+                    memberSignUpEventService.requestFailed(creationRequest, "멤버 저장 실패");
+                }
             }
 
             @Override
-            public void onFailure (Call call, Throwable t){
+            public void onFailure(Call call, Throwable t) {
                 super.onFailure(call, t);
 
                 memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다. " + t.getMessage());
                 return;
             }
         };
-}
+    }
 
     /**
      * 스크랩 요청 후 응답
      */
-    @Transactional
     public CustomCallback<ScrapResponse> getScrapResponseCallback(Long memberId) {
 
         return new CustomCallback<ScrapResponse>() {
@@ -113,12 +133,20 @@ public class MemberCallbackEvent {
                 ScrapResponse scrapResponse = response.body();
                 EmployeeIncomeCreationRequest employeeIncomeCreationRequest = new EmployeeIncomeCreationRequest(scrapResponse);
 
-                Member member = memberRepository.findById(memberId)
-                        .orElseThrow(() -> new MemberNotFoundException(memberId));
+                AtomicBoolean isTransactionFailed = new AtomicBoolean(false);
+                transactionTemplate.executeWithoutResult(transactionStatus -> {
+                    try {
+                        employeeIncomeService.upsert(memberId, employeeIncomeCreationRequest);
+                    } catch (Throwable e) {
+                        isTransactionFailed.set(true);
+                        e.printStackTrace();
+                        transactionStatus.setRollbackOnly();
+                    }
+                });
 
-                memberScrapEventService.requestComplete(memberId);
-
-                employeeIncomeService.upsert(member.getId(), employeeIncomeCreationRequest);
+                if(isTransactionFailed.get()){
+                    memberScrapEventService.requestFailed(memberId);
+                }
             }
 
             @Override

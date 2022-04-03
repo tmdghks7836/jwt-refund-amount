@@ -48,8 +48,9 @@ public class MemberScrapEventService {
             throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING);
         }
 
+        //TODO 실패 이유에 대해 scrapEvent로 저장할 필요가 있음.
         if (memberScrapEvent.isFailed()) {
-            throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED);
+            throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED, "스크랩에 실패하였습니다.");
         }
     }
 
@@ -68,10 +69,15 @@ public class MemberScrapEventService {
         return scrapEventOptional;
     }
 
+    /**
+     * 비동기 호출 시 @transactional 기능이 동작하지 않아 flush로 대체
+     * */
     public void requestFailed(Long memberId) {
 
         MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberId(memberId).orElseThrow(() -> new ResourceNotFoundException());
 
         memberScrapEvent.changeFailed();
+
+        memberScrapEventRepository.flush();
     }
 }

@@ -42,11 +42,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
+    //TODO swagger, h2-console 은 local profile 설정으로 지정해야함
     @Override
     public void configure(WebSecurity web) {
         web.ignoring()
                 .antMatchers(
-                        "/h2-console/**", "/error"
+                        "/h2-console/**", "/favicon.ico", "/error"
                         , "/csrf", "/v3/api-docs", "/configuration/**",
                         "/swagger*/**", "/webjars/**"
                 );

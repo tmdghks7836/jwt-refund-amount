@@ -43,8 +43,8 @@ api:
 
 
 encryption:
-  key: iwanttogetin3o3heworlddd34567890
-
+  key:
+    member-regno: "iwanttogetin3o3heworlddd34567890"
 logging.level:
   org.hibernate.SQL: debug
 #  org.hibernate.type: trace

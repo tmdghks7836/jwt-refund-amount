@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ public class MemberSignUpEventService {
     @Value("${api.test-3o3.timeout}")
     private Integer test3o3ApiTimeout;
 
+    @Transactional
     public void createRequestEvent(HasUserIdPassword userIdPassword) {
 
         log.info("화원가입 요청 이력을 생성합니다.");
@@ -47,6 +49,7 @@ public class MemberSignUpEventService {
         signUpEventRepository.save(memberSignUpEvent);
     }
 
+    @Transactional
     public void requestComplete(HasUserIdPassword userIdPassword) {
 
         log.info("화원가입 요청 이력을 생성합니다.");
@@ -60,6 +63,7 @@ public class MemberSignUpEventService {
         signUpEventRepository.save(memberSignUpEvent);
     }
 
+    @Transactional
     public void requestFailed(HasUserIdPassword userIdPassword, String message) {
 
         log.info("화원가입 요청 실패 이력을 생성합니다.");

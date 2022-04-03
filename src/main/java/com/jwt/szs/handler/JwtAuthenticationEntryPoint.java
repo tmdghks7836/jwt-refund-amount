@@ -3,6 +3,7 @@ package com.jwt.szs.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.exception.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -13,6 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 확인된 Authentications exception list
+ * InsufficientAuthenticationException 불충분한 인증
+ * */
+@Slf4j
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -23,6 +29,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
+        log.info("JwtAuthenticationEntryPoint");
         authException.printStackTrace();
         ErrorCode errorCode = ErrorCode.AUTHENTICATION_FAIL;
 
