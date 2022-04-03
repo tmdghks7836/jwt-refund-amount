@@ -78,41 +78,50 @@ public class MemberSignUpEventService {
         signUpEventRepository.save(memberSignUpEvent);
     }
 
-    public void validateHistoryInSeconds(HasUserIdPassword useridPassword) {
+    /**
+     * 로그인 진행 시 아직 회원가입 요청중인지 회원가입 실패되었는지 일정시간동안 확인합니다.
+     */
+    public void validateBeforeLogin(HasUserIdPassword useridPassword) {
+
+        if (isSomeOneRequestPending(useridPassword)) {
+            throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING);
+        }
 
         log.info("{}초 내에 생성된 회원의 가입요청 상태정보를 찾습니다..", secondsOfFindingMember);
 
         Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
                 useridPassword.getUserId(),
+                MemberSignUpStatus.COMPLETED,
                 secondsOfFindingMember
         );
 
-        if (!signUpEventOptional.isPresent() ) {
+        if (!signUpEventOptional.isPresent()) {
             return;
         }
 
         MemberSignUpEvent memberSignUpEvent = signUpEventOptional.get();
 
-        if(!passwordEncoder.matches(useridPassword.getPassword(), memberSignUpEvent.getPassword())){
+        /**
+         * 다른사람이 동시간에 회원가입 요청 할 경우 비밀번호로 검증합니다.
+         * */
+        if (passwordEncoder.matches(useridPassword.getPassword(), memberSignUpEvent.getPassword())) {
             return;
         }
 
-        if (memberSignUpEvent.isPending()) {
-            throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING, memberSignUpEvent.getMessage());
-        }
-
-        if (memberSignUpEvent.isFailed()) {
-            throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED, "회원가입에 실패한 정보입니다. 다시 회원가입을 진행해주세요.");
-        }
+        throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED, "회원가입에 실패한 정보입니다. 다시 회원가입을 진행해주세요.");
     }
 
+    /**
+     * SoS에서 응답을 받는 시간동안 해당 아이디는 회원가입 요청중 상태로 lock을 잡아놓습니다.
+     * */
     public boolean isSomeOneRequestPending(HasUserIdPassword useridPassword) {
 
         Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
                 useridPassword.getUserId(),
-                secondsOfFindingMember);
+                MemberSignUpStatus.PENDING,
+                test3o3ApiTimeout);
 
-        if(!signUpEventOptional.isPresent()){
+        if (!signUpEventOptional.isPresent()) {
             return false;
         }
 

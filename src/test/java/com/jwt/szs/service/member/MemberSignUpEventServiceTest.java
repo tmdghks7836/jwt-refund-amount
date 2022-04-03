@@ -66,22 +66,22 @@ class MemberSignUpEventServiceTest {
     @DisplayName("로그인 시 특정 시간 내 회원가입 상태 기록없으므로 예외처리 하지 않음.")
     void validateHistoryInSeconds() {
 
-        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any()))
+        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
                 .thenReturn(Optional.empty());
 
         Assertions.assertDoesNotThrow(() ->
-                memberSignUpEventService.validateHistoryInSeconds(createAuthenticationRequest()));
+                memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
     }
 
     @Test
     @DisplayName("로그인 시 특정 시간 내 회원가입 상태 기록 확인 시 회원가입 요청중일 경우.")
     void validateHistoryInSeconds2() {
 
-        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any()))
+        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
                 .thenReturn(Optional.ofNullable(createMemberSignupEvent(MemberSignUpStatus.PENDING)));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
-                memberSignUpEventService.validateHistoryInSeconds(createAuthenticationRequest()));
+                memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
 
         Assertions.assertEquals(ErrorCode.REQUEST_PENDING, customRuntimeException.getErrorCode());
     }
@@ -90,11 +90,11 @@ class MemberSignUpEventServiceTest {
     @DisplayName("로그인 시 특정 시간 내 회원가입 상태 기록 확인 시 회원가입 요청 실패날 경우.")
     void validateHistoryInSeconds3() {
 
-        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any()))
+        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
                 .thenReturn(Optional.ofNullable(createMemberSignupEvent(MemberSignUpStatus.FAILED)));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
-                memberSignUpEventService.validateHistoryInSeconds(createAuthenticationRequest()));
+                memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
 
         Assertions.assertEquals(ErrorCode.REQUEST_FAILED, customRuntimeException.getErrorCode());
     }
@@ -103,7 +103,7 @@ class MemberSignUpEventServiceTest {
     @DisplayName("회원가입시 특정 시간 내 누군가 이미 같은 userId로 가입요청을 보냈을 경우")
     void isSomeOneRequestPending() {
 
-        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any()))
+        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
                 .thenReturn(Optional.ofNullable(createMemberSignupEvent(MemberSignUpStatus.PENDING)));
 
 

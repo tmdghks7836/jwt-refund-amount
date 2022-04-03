@@ -73,7 +73,7 @@ public class MemberService implements UserDetailsService {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(userIdPassword.getUserId());
 
-        memberSignUpEventService.validateHistoryInSeconds(userIdPassword);
+        memberSignUpEventService.validateBeforeLogin(userIdPassword);
 
         if (!memberOptional.isPresent()) {
             /**

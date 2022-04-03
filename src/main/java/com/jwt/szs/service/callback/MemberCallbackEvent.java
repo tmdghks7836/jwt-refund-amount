@@ -4,26 +4,18 @@ package com.jwt.szs.service.callback;
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.core.CustomCallback;
 import com.jwt.szs.core.SzsTransactionManager;
+import com.jwt.szs.core.SzsTransactionResult;
 import com.jwt.szs.model.dto.EmployeeIncomeCreationRequest;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
-import com.jwt.szs.model.entity.Member;
-import com.jwt.szs.repository.MemberRepository;
 import com.jwt.szs.service.EmployeeIncomeService;
 import com.jwt.szs.service.member.MemberScrapEventService;
 import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.service.member.MemberSignUpEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.StringUtils;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -66,26 +58,30 @@ public class MemberCallbackEvent {
                 }
 
                 ScrapResponse.IncomeInfo incomeInfo = scrapResponse.getIncomeInfo();
-                String workerName = incomeInfo.getWorkerName();
-                String regNo = incomeInfo.getRegNo();
 
                 /** 비동기 호출 시
                  * 회원가입진행 시 응답이 올떄까지 프론트에서 일정 초마다 polling check를 하며
                  *  회원가입이 완료될 때까지 기다리는 방법으로 구현 할 수 있을것 같다.. */
-                if (!(creationRequest.getName().equals(workerName)
-                        && creationRequest.getRegNo().equals(regNo))) {
+                if (!(creationRequest.getName().equals(incomeInfo.getWorkerName())
+                        && creationRequest.getRegNo().equals(incomeInfo.getRegNo()))) {
+
                     tm.startTransaction(() ->
-                            memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼api의 이름과 주민번호가 맞지 않습니다."));
+                            memberSignUpEventService.requestFailed(creationRequest,
+                                    "삼쩜삼api의 이름과 주민번호가 맞지 않습니다."));
                     return;
                 }
 
-                String errorMessage = tm.startTransaction(() -> {
+                SzsTransactionResult szsTransactionResult = tm.startTransaction(() -> {
                     memberService.createMember(creationRequest);
                 });
 
-                if (StringUtils.hasText(errorMessage)) {
+                if (!szsTransactionResult.getIsSuccess()) {
                     tm.startTransaction(() ->
-                            memberSignUpEventService.requestFailed(creationRequest, errorMessage));
+                            memberSignUpEventService.requestFailed(
+                                    creationRequest,
+                                    szsTransactionResult.getMessage()
+                            )
+                    );
                 }
             }
 
@@ -94,8 +90,8 @@ public class MemberCallbackEvent {
                 super.onFailure(call, t);
 
                 tm.startTransaction(() ->
-                        memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다. " + t.getMessage()));
-                return;
+                        memberSignUpEventService.requestFailed(creationRequest,
+                                "삼쩜삼 api 응답에 실패했습니다. " + t.getMessage()));
             }
         };
     }
@@ -121,10 +117,11 @@ public class MemberCallbackEvent {
                 ScrapResponse scrapResponse = response.body();
                 EmployeeIncomeCreationRequest employeeIncomeCreationRequest = new EmployeeIncomeCreationRequest(scrapResponse);
 
-                String exceptionMessage = tm.startTransaction(() -> employeeIncomeService.upsert(memberId, employeeIncomeCreationRequest));
+                SzsTransactionResult szsTransactionResult = tm.startTransaction(() ->
+                        employeeIncomeService.upsert(memberId, employeeIncomeCreationRequest));
 
-                if (StringUtils.hasText(exceptionMessage)) {
-                    tm.startTransaction(() -> memberScrapEventService.requestFailed(memberId, exceptionMessage));
+                if (!szsTransactionResult.getIsSuccess()) {
+                    tm.startTransaction(() -> memberScrapEventService.requestFailed(memberId, szsTransactionResult.getMessage()));
                 }
             }
 
