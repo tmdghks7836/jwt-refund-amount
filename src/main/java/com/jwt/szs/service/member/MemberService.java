@@ -16,6 +16,7 @@ import com.jwt.szs.service.EmployeeIncomeService;
 import com.jwt.szs.service.callback.MemberCallbackEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,7 +45,12 @@ public class MemberService implements UserDetailsService {
 
     private final MemberSignUpEventService memberSignUpEventService;
 
-    private final MemberCallbackEvent memberCallbackEvent;
+    private MemberCallbackEvent memberCallbackEvent;
+
+    @Autowired
+    public void setMemberCallbackEvent(MemberCallbackEvent memberCallbackEvent) {
+        this.memberCallbackEvent = memberCallbackEvent;
+    }
 
     @Override
     public UserDetails loadUserByUsername(final String userId) {
@@ -98,7 +104,7 @@ public class MemberService implements UserDetailsService {
         Optional<Member> memberByUserIdAndRegNo = memberRepository.findByNameAndRegNo(creationRequest.getName(),
                 creationRequest.getRegNo());
 
-        if(memberByUserIdAndRegNo.isPresent()){
+        if (memberByUserIdAndRegNo.isPresent()) {
             throw new AlreadyExistException("이미 등록된 유저 정보입니다.");
         }
 
@@ -154,7 +160,7 @@ public class MemberService implements UserDetailsService {
                 passwordEncoder.encode(creationRequest.getPassword())
         );
 
-        memberRepository.save(member);
+        memberRepository.saveAndFlush(member);
         memberSignUpEventService.requestComplete(creationRequest);
     }
 }

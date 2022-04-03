@@ -10,9 +10,11 @@ import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.repository.MemberRepository;
 import com.jwt.szs.service.EmployeeIncomeService;
 import com.jwt.szs.service.member.MemberScrapEventService;
+import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.service.member.MemberSignUpEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionDefinition;
@@ -33,15 +35,13 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class MemberCallbackEvent {
 
-    private final PasswordEncoder passwordEncoder;
-
     private final EmployeeIncomeService employeeIncomeService;
 
     private final MemberScrapEventService memberScrapEventService;
 
     private final MemberSignUpEventService memberSignUpEventService;
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     private final SzsTransactionManager tm;
 
@@ -79,16 +79,8 @@ public class MemberCallbackEvent {
                     return;
                 }
 
-                Member member = new Member(
-                        creationRequest.getUserId(),
-                        creationRequest.getName(),
-                        creationRequest.getRegNo(),
-                        passwordEncoder.encode(creationRequest.getPassword())
-                );
-
                 String errorMessage = tm.startTransaction(() -> {
-                    memberSignUpEventService.requestComplete(creationRequest);
-                    memberRepository.saveAndFlush(member);
+                    memberService.createMember(creationRequest);
                 });
 
                 if (StringUtils.hasText(errorMessage)) {
@@ -131,8 +123,8 @@ public class MemberCallbackEvent {
 
                 String exceptionMessage = tm.startTransaction(() -> employeeIncomeService.upsert(memberId, employeeIncomeCreationRequest));
 
-                if(StringUtils.hasText(exceptionMessage)){
-                    tm.startTransaction(() ->  memberScrapEventService.requestFailed(memberId, exceptionMessage));
+                if (StringUtils.hasText(exceptionMessage)) {
+                    tm.startTransaction(() -> memberScrapEventService.requestFailed(memberId, exceptionMessage));
                 }
             }
 

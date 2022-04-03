@@ -38,7 +38,7 @@ public class MemberScrapEventService {
         Optional<MemberScrapEvent> memberScrapEventOptional = getByCreatedAtDesc(memberId);
 
         if (!memberScrapEventOptional.isPresent()) {
-            throw new CustomRuntimeException(ErrorCode.NOT_FOUND_REQUEST_HISTORY);
+            throw new CustomRuntimeException(ErrorCode.NOT_FOUND_REQUEST_HISTORY, "내정보를 스크랩 한 후 시도해주세요.");
         }
 
         MemberScrapEvent memberScrapEvent = memberScrapEventOptional.get();
