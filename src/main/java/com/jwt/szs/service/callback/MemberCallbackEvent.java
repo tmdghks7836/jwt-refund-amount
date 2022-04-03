@@ -3,6 +3,7 @@ package com.jwt.szs.service.callback;
 
 import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.core.CustomCallback;
+import com.jwt.szs.core.SzsTransactionManager;
 import com.jwt.szs.model.dto.EmployeeIncomeCreationRequest;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
 import com.jwt.szs.model.entity.Member;
@@ -14,18 +15,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 import retrofit2.Call;
 import retrofit2.Response;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
  * 비동기 호출시 @transactional 동작하지 않음.
  * call.enqueue( new okhttp3.Callback() 으로 작동함
- * */
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -39,9 +41,9 @@ public class MemberCallbackEvent {
 
     private final MemberSignUpEventService memberSignUpEventService;
 
-    private final TransactionTemplate transactionTemplate;
-
     private final MemberRepository memberRepository;
+
+    private final SzsTransactionManager tm;
 
     public CustomCallback<ScrapResponse> signUpCallback(MemberCreationRequest creationRequest) {
 
@@ -58,7 +60,8 @@ public class MemberCallbackEvent {
                     /** 회원가입 상태 로그 저장
                      메일 정보가 있다면 회원가입 실패 알람을 보낼 것 같다.
                      * */
-                    memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답값이 잘못되었습니다.");
+                    tm.startTransaction(() ->
+                            memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답값이 잘못되었습니다."));
                     return;
                 }
 
@@ -71,8 +74,8 @@ public class MemberCallbackEvent {
                  *  회원가입이 완료될 때까지 기다리는 방법으로 구현 할 수 있을것 같다.. */
                 if (!(creationRequest.getName().equals(workerName)
                         && creationRequest.getRegNo().equals(regNo))) {
-
-                    memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼api의 이름과 주민번호가 맞지 않습니다.");
+                    tm.startTransaction(() ->
+                            memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼api의 이름과 주민번호가 맞지 않습니다."));
                     return;
                 }
 
@@ -83,22 +86,14 @@ public class MemberCallbackEvent {
                         passwordEncoder.encode(creationRequest.getPassword())
                 );
 
-
-                AtomicBoolean isTransactionFailed = new AtomicBoolean(false);
-                transactionTemplate.executeWithoutResult(transactionStatus -> {
-                    try {
-                        memberSignUpEventService.requestComplete(creationRequest);
-                        memberRepository.saveAndFlush(member);
-                    } catch (Throwable e) {
-                        //TODO 저장 실패 시 케이스 별로 메세지 남길 필요가 있다.
-                        isTransactionFailed.set(true);
-                        e.printStackTrace();
-                        transactionStatus.setRollbackOnly();
-                    }
+                String errorMessage = tm.startTransaction(() -> {
+                    memberSignUpEventService.requestComplete(creationRequest);
+                    memberRepository.saveAndFlush(member);
                 });
 
-                if(isTransactionFailed.get()){
-                    memberSignUpEventService.requestFailed(creationRequest, "멤버 저장 실패");
+                if (StringUtils.hasText(errorMessage)) {
+                    tm.startTransaction(() ->
+                            memberSignUpEventService.requestFailed(creationRequest, errorMessage));
                 }
             }
 
@@ -106,7 +101,8 @@ public class MemberCallbackEvent {
             public void onFailure(Call call, Throwable t) {
                 super.onFailure(call, t);
 
-                memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다. " + t.getMessage());
+                tm.startTransaction(() ->
+                        memberSignUpEventService.requestFailed(creationRequest, "삼쩜삼 api 응답에 실패했습니다. " + t.getMessage()));
                 return;
             }
         };
@@ -126,26 +122,17 @@ public class MemberCallbackEvent {
                 if (!response.isSuccessful()) {
 
                     log.error("스크랩 요청 실패 memberId : {}, message : {}", memberId, response.message());
-                    memberScrapEventService.requestFailed(memberId);
+                    tm.startTransaction(() -> memberScrapEventService.requestFailed(memberId, response.message()));
                     return;
                 }
 
                 ScrapResponse scrapResponse = response.body();
                 EmployeeIncomeCreationRequest employeeIncomeCreationRequest = new EmployeeIncomeCreationRequest(scrapResponse);
 
-                AtomicBoolean isTransactionFailed = new AtomicBoolean(false);
-                transactionTemplate.executeWithoutResult(transactionStatus -> {
-                    try {
-                        employeeIncomeService.upsert(memberId, employeeIncomeCreationRequest);
-                    } catch (Throwable e) {
-                        isTransactionFailed.set(true);
-                        e.printStackTrace();
-                        transactionStatus.setRollbackOnly();
-                    }
-                });
+                String exceptionMessage = tm.startTransaction(() -> employeeIncomeService.upsert(memberId, employeeIncomeCreationRequest));
 
-                if(isTransactionFailed.get()){
-                    memberScrapEventService.requestFailed(memberId);
+                if(StringUtils.hasText(exceptionMessage)){
+                    tm.startTransaction(() ->  memberScrapEventService.requestFailed(memberId, exceptionMessage));
                 }
             }
 
@@ -154,9 +141,8 @@ public class MemberCallbackEvent {
                 super.onFailure(call, t);
 
                 log.error("스크랩 요청 실패 memberId : {}, message : {}", memberId, t.getMessage());
-                memberScrapEventService.requestFailed(memberId);
+                tm.startTransaction(() -> memberScrapEventService.requestFailed(memberId, t.getMessage()));
             }
         };
     }
-
 }

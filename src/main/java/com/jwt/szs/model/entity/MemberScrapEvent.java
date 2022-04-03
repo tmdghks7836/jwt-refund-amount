@@ -32,11 +32,22 @@ public class MemberScrapEvent extends BaseDateTime {
     @Column(nullable = false)
     private MemberScrapStatus status;
 
+    @Column(length = 1000)
+    private String message;
+
+
     public MemberScrapEvent(Long memberId, MemberScrapStatus memberScrapStatus) {
+
+        this(memberId, memberScrapStatus, null);
+    }
+
+    public MemberScrapEvent(Long memberId, MemberScrapStatus memberScrapStatus, String message) {
 
         this.memberId = memberId;
         this.status = memberScrapStatus;
+        this.message = message;
     }
+
 
     public Boolean isPending() {
 
@@ -46,15 +57,5 @@ public class MemberScrapEvent extends BaseDateTime {
     public Boolean isFailed() {
 
         return status.equals(MemberScrapStatus.FAILED);
-    }
-
-    public void changeComplete() {
-
-        status = MemberScrapStatus.COMPLETED;
-    }
-
-    public void changeFailed() {
-
-        status = MemberScrapStatus.FAILED;
     }
 }

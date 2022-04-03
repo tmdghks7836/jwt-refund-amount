@@ -1,12 +1,9 @@
 package com.jwt.szs.service.member;
 
 import com.jwt.szs.api.codetest3o3.model.NameWithRegNoDto;
-import com.jwt.szs.api.codetest3o3.model.ScrapResponse;
 import com.jwt.szs.api.service.CodeTest3o3ApiService;
-import com.jwt.szs.core.CustomCallback;
 import com.jwt.szs.exception.*;
 import com.jwt.szs.model.base.HasUserIdPassword;
-import com.jwt.szs.model.dto.EmployeeIncomeCreationRequest;
 import com.jwt.szs.model.dto.EmployeeIncomeResponse;
 import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
 import com.jwt.szs.model.dto.member.MemberCreationRequest;
@@ -26,9 +23,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-import retrofit2.Call;
-import retrofit2.Response;
 
 import java.util.Optional;
 
@@ -99,6 +93,13 @@ public class MemberService implements UserDetailsService {
         if (memberOptional.isPresent()
                 || memberSignUpEventService.isSomeOneRequestPending(creationRequest)) {
             throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
+        }
+
+        Optional<Member> memberByUserIdAndRegNo = memberRepository.findByNameAndRegNo(creationRequest.getName(),
+                creationRequest.getRegNo());
+
+        if(memberByUserIdAndRegNo.isPresent()){
+            throw new AlreadyExistException("이미 등록된 유저 정보입니다.");
         }
 
         memberSignUpEventService.createRequestEvent(creationRequest);

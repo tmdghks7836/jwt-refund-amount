@@ -3,7 +3,6 @@ package com.jwt.szs.service.member;
 import com.jwt.szs.api.codetest3o3.model.type.MemberScrapStatus;
 import com.jwt.szs.exception.CustomRuntimeException;
 import com.jwt.szs.exception.ErrorCode;
-import com.jwt.szs.exception.ResourceNotFoundException;
 import com.jwt.szs.model.entity.MemberScrapEvent;
 import com.jwt.szs.repository.MemberScrapEventRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,7 @@ public class MemberScrapEventService {
 
         log.info("스크랩 요청 상태 이력을 확인합니다.");
 
-        Optional<MemberScrapEvent> memberScrapEventOptional = get(memberId);
+        Optional<MemberScrapEvent> memberScrapEventOptional = getByCreatedAtDesc(memberId);
 
         if (!memberScrapEventOptional.isPresent()) {
             throw new CustomRuntimeException(ErrorCode.NOT_FOUND_REQUEST_HISTORY);
@@ -48,36 +47,32 @@ public class MemberScrapEventService {
             throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING);
         }
 
-        //TODO 실패 이유에 대해 scrapEvent로 저장할 필요가 있음.
         if (memberScrapEvent.isFailed()) {
             throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED, "스크랩에 실패하였습니다.");
         }
     }
 
-    @Transactional
     public void requestComplete(Long memberId) {
 
-        MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberId(memberId).orElseThrow(() -> new ResourceNotFoundException());
+        MemberScrapEvent memberScrapEvent = new MemberScrapEvent(memberId, MemberScrapStatus.COMPLETED);
 
-        memberScrapEvent.changeComplete();
+        memberScrapEventRepository.saveAndFlush(memberScrapEvent);
     }
 
-    public Optional<MemberScrapEvent> get(Long memberId) {
+    public Optional<MemberScrapEvent> getByCreatedAtDesc(Long memberId) {
 
-        Optional<MemberScrapEvent> scrapEventOptional = memberScrapEventRepository.findByMemberId(memberId);
+        Optional<MemberScrapEvent> scrapEventOptional = memberScrapEventRepository.findByMemberIdAndCreatedAtDesc(memberId);
 
         return scrapEventOptional;
     }
 
     /**
      * 비동기 호출 시 @transactional 기능이 동작하지 않아 flush로 대체
-     * */
-    public void requestFailed(Long memberId) {
+     */
+    public void requestFailed(Long memberId, String message) {
 
-        MemberScrapEvent memberScrapEvent = memberScrapEventRepository.findByMemberId(memberId).orElseThrow(() -> new ResourceNotFoundException());
+        MemberScrapEvent memberScrapEvent = new MemberScrapEvent(memberId, MemberScrapStatus.FAILED, message);
 
-        memberScrapEvent.changeFailed();
-
-        memberScrapEventRepository.flush();
+        memberScrapEventRepository.saveAndFlush(memberScrapEvent);
     }
 }

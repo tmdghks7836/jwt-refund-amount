@@ -98,7 +98,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 실패. 조회하는 멤버가 존재")
+    @DisplayName("회원가입 실패. 가입하려는 아이디가 이미 존재할때")
     void signupThrowAlreadyExistException() {
 
         Mockito.when(memberRepository.findByUserId(any()))

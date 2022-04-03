@@ -28,7 +28,7 @@ public class MemberSignUpEventService {
 
     private final MemberSignUpEventRepository signUpEventRepository;
 
-    private final Integer secWhichFindMember = 1000 * 60 * 5;
+    private final Integer secondsOfFindingMember = 60 * 10;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -60,7 +60,7 @@ public class MemberSignUpEventService {
                 encodePassword,
                 MemberSignUpStatus.COMPLETED);
 
-        signUpEventRepository.save(memberSignUpEvent);
+        signUpEventRepository.saveAndFlush(memberSignUpEvent);
     }
 
     @Transactional
@@ -80,11 +80,11 @@ public class MemberSignUpEventService {
 
     public void validateHistoryInSeconds(HasUserIdPassword useridPassword) {
 
-        log.info("{}분 내에 생성된 회원의 가입요청 상태정보를 찾습니다..", secWhichFindMember);
+        log.info("{}초 내에 생성된 회원의 가입요청 상태정보를 찾습니다..", secondsOfFindingMember);
 
-        Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAndPasswordInSec(
+        Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
                 useridPassword.getUserId(),
-                secWhichFindMember
+                secondsOfFindingMember
         );
 
         if (!signUpEventOptional.isPresent() ) {
@@ -108,9 +108,9 @@ public class MemberSignUpEventService {
 
     public boolean isSomeOneRequestPending(HasUserIdPassword useridPassword) {
 
-        Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAndPasswordInSec(
+        Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
                 useridPassword.getUserId(),
-                secWhichFindMember);
+                secondsOfFindingMember);
 
         if(!signUpEventOptional.isPresent()){
             return false;

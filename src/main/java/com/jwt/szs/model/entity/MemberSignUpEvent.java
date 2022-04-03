@@ -32,7 +32,7 @@ public class MemberSignUpEvent extends BaseDateTime {
     @Column(nullable = false)
     private MemberSignUpStatus status;
 
-    @Column
+    @Column(length = 1000)
     private String message;
 
     public MemberSignUpEvent(String userId, String password, MemberSignUpStatus status) {

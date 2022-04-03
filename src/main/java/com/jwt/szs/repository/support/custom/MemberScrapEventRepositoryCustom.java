@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface MemberScrapEventRepositoryCustom {
 
-    Optional<MemberScrapEvent> findByMemberId(Long memberId);
+    Optional<MemberScrapEvent> findByMemberIdAndCreatedAtDesc(Long memberId);
 }

@@ -8,8 +8,11 @@ import com.jwt.szs.repository.support.custom.MemberSignUpEventRepositoryCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Slf4j
 @Repository
@@ -22,10 +25,11 @@ public class MemberSignUpEventRepositoryImpl extends QuerydslRepositorySupportBa
     }
 
     @Override
-    public Optional<MemberSignUpEvent> findByUserIdAndPasswordInSec(String userId, Integer createdSeconds) {
+    public Optional<MemberSignUpEvent> findByUserIdAfterSeconds(String userId, Integer createdSeconds) {
 
-        LocalDateTime now = LocalDateTime.now().minusSeconds(createdSeconds);
+        LocalDateTime now =  LocalDateTime.now(TimeZone.getDefault().toZoneId()).minusSeconds(createdSeconds);
 
+        log.info(now.toString());
         MemberSignUpEvent memberSignUpEvent = getQueryFactory()
                 .selectFrom(qMemberSignUpEvent)
                 .where(
