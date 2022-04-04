@@ -14,7 +14,7 @@ public enum ErrorCode {
     NOT_MATCHED_VALUE(HttpStatus.BAD_REQUEST, "E0002", "저장된 값과 일지하지 않습니다."),
     TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "E0003", "이미 만료된 토큰입니다."),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E0004", "요청한 리소스를 찾을 수 없습니다."),
-    NOT_MATCHED_PASSWORD(HttpStatus.NOT_FOUND, "E0006", "패스워드가 맞지 않습니다."),
+    NOT_MATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "E0006", "패스워드가 맞지 않습니다."),
     NOT_FOUND_PERMISSION(HttpStatus.FORBIDDEN, "E0007", "권한이 없습니다."),
     AUTHENTICATION_FAIL(HttpStatus.UNAUTHORIZED, "E0008", "인증에 실패하였습니다."),
     ALREADY_EXIST_DATA(HttpStatus.BAD_REQUEST, "E0009", "이미 존재하는 데이터입니다."),
@@ -23,7 +23,7 @@ public enum ErrorCode {
     DECRYPTION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E0012", "대칭키 복호화에 실패하였습니다."),
     PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E0013", "데이터 파싱 에러."),
     REQUEST_PENDING(HttpStatus.BAD_REQUEST, "E0014", "요청정보 처리중입니다."),
-    VALIDATE_TOKEN_FAILED(HttpStatus.BAD_REQUEST, "E0015", "토큰 인증에 실패하였습니다."),
+    VALIDATE_TOKEN_FAILED(HttpStatus.BAD_REQUEST, "E0015", "토큰 검증에 실패하였습니다."),
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E0016", "알수 없는 에러입니다."),
     REQUEST_FAILED(HttpStatus.BAD_REQUEST, "E0017", "요청에 실패햐였습니다."),
     NOT_FOUND_REQUEST_HISTORY(HttpStatus.BAD_REQUEST, "E0018", "요청 이력이 없습니다.");

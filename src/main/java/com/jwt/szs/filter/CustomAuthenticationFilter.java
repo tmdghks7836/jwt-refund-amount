@@ -47,7 +47,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
                 .userId(userId)
                 .password(password)
                 .build();
-        final MemberResponse memberResponse = memberService.getByUserIdAndPassword(authenticationRequest);
+        final MemberResponse memberResponse = memberService.getByUserIdAndPasswordForLogin(authenticationRequest);
 
         final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
 

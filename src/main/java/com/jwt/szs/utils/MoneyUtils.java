@@ -15,27 +15,27 @@ public class MoneyUtils {
 
         String[] korean = {"만", "억", "조", "경"};
         Map<Integer, String> map = new HashMap<>();
-        int maxDivision = 0;
+        int maxSquared = 0;
 
         for (int i = 0; i < korean.length; i++) {
 
-            maxDivision += 4;
-            map.put(maxDivision, korean[i]);
+            maxSquared += 4;
+            map.put(maxSquared, korean[i]);
         }
 
         StringBuilder sb = new StringBuilder();
         boolean appendStarted = false;
-        while (maxDivision > 0) {
+        while (maxSquared > 0) {
 
-            long num = (long) (absMoney / Math.pow(10, maxDivision)) % 10000;
+            long num = (long) (absMoney / Math.pow(10, maxSquared)) % 10000;
 
             if (num > 0) {
 
                 appendSpace(appendStarted, sb);
-                sb.append(num).append(map.get(maxDivision));
+                sb.append(num).append(map.get(maxSquared));
                 appendStarted = true;
             }
-            maxDivision -= 4;
+            maxSquared -= 4;
         }
 
         long thousand = (long) (absMoney / Math.pow(10, 3) % 10);

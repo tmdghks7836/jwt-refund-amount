@@ -21,20 +21,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.Cookie;
@@ -46,7 +43,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @Slf4j
-@Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MemberControllerTest {
 
@@ -140,7 +136,7 @@ class MemberControllerTest {
         String password = "123";
         MemberResponse memberResponse = MemberResponse.builder().userId(userId).id(id).build();
 
-        Mockito.when(memberService.getByUserIdAndPassword(any()))
+        Mockito.when(memberService.getByUserIdAndPasswordForLogin(any()))
                 .thenReturn(memberResponse);
         Mockito.when(memberService.loadUserByUsername(any()))
                 .thenReturn(
@@ -181,23 +177,6 @@ class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", ""))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andReturn();
-    }
-
-    @Test
-    public void 토큰검증() throws Exception {
-
-        String token = generateAccessToken(
-                SimpleMember.builder()
-                        .id(1l)
-                        .name("홍길동")
-                        .userId("tmdghks").build()
-        );
-
-        mockMvc.perform(get("/api/test/token")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }
 

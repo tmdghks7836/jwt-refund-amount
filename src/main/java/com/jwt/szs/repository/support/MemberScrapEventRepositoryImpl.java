@@ -20,7 +20,7 @@ public class MemberScrapEventRepositoryImpl extends QuerydslRepositorySupportBas
     }
 
     @Override
-    public Optional<MemberScrapEvent> findByMemberId(Long memberId) {
+    public Optional<MemberScrapEvent> findByMemberIdAndCreatedAtDesc(Long memberId) {
 
         MemberScrapEvent memberScrapEvent = getQueryFactory()
                 .selectFrom(qMemberScrapEvent)

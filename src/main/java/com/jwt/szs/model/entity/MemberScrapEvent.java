@@ -14,7 +14,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "member_scrap_event", indexes = {
-        @Index(name = "member_id_index", columnList = "memberId, createdAt")
+        @Index(name = "member_scrap_event_index", columnList = "memberId, createdAt")
 })
 @Getter
 @Setter(AccessLevel.PROTECTED)
@@ -32,11 +32,22 @@ public class MemberScrapEvent extends BaseDateTime {
     @Column(nullable = false)
     private MemberScrapStatus status;
 
+    @Column(length = 1000)
+    private String message;
+
+
     public MemberScrapEvent(Long memberId, MemberScrapStatus memberScrapStatus) {
+
+        this(memberId, memberScrapStatus, null);
+    }
+
+    public MemberScrapEvent(Long memberId, MemberScrapStatus memberScrapStatus, String message) {
 
         this.memberId = memberId;
         this.status = memberScrapStatus;
+        this.message = message;
     }
+
 
     public Boolean isPending() {
 
@@ -46,15 +57,5 @@ public class MemberScrapEvent extends BaseDateTime {
     public Boolean isFailed() {
 
         return status.equals(MemberScrapStatus.FAILED);
-    }
-
-    public void changeComplete() {
-
-        status = MemberScrapStatus.COMPLETED;
-    }
-
-    public void changeFailed() {
-
-        status = MemberScrapStatus.FAILED;
     }
 }

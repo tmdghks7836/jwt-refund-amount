@@ -17,10 +17,11 @@ public class CodeTest3o3ApiService {
 
     public void getScrapByNameAndRegNo(NameWithRegNoDto request, CustomCallback callback) {
 
-        log.info("스크랩 정보 비동기 요청.");
+        log.info("code test 3o3 api 비동기 요청.");
 
         Call call = codeTest3o3Api.getScrapByNameAndRegNo(request);
 
         call.enqueue(callback);
+
     }
 }

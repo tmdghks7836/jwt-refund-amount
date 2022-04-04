@@ -6,6 +6,7 @@ import com.jwt.szs.model.dto.EmployeeIncomeResponse;
 import com.jwt.szs.model.entity.EmployeeIncome;
 import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.repository.EmployeeIncomeRepository;
+import com.jwt.szs.service.member.MemberScrapEventService;
 import com.jwt.szs.service.member.MemberService;
 import com.jwt.szs.utils.MoneyUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +24,14 @@ public class EmployeeIncomeService {
 
     private final RefundService refundService;
 
+    private final MemberScrapEventService memberScrapEventService;
+
     @Transactional
     public void upsert(Long memberId, EmployeeIncomeCreationRequest creationRequest) {
 
         log.info("근로소득 정보를 저장합니다. 기존에 가지고 있다면 업데이트 합니다.");
 
+        memberScrapEventService.requestComplete(memberId);
         employeeIncomeRepository.findByMemberId(memberId)
                 .ifPresentOrElse(employeeIncome -> {
 

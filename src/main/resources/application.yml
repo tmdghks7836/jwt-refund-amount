@@ -40,11 +40,15 @@ api:
     url: "https://codetest.3o3.co.kr/"
     timeout: 25
 
+szs:
+  #회원가입 실패 후 유저가 실패를 확인 할 수 있는 시간입니다. 메일 알림 기능 대신 사용함.
+  find-sign-up-event-seconds: 600
+
 
 
 encryption:
-  key: iwanttogetin3o3heworlddd34567890
-
+  key:
+    member-regno: "iwanttogetin3o3heworlddd34567890"
 logging.level:
   org.hibernate.SQL: debug
 #  org.hibernate.type: trace

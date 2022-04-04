@@ -16,6 +16,7 @@ import com.jwt.szs.service.EmployeeIncomeService;
 import com.jwt.szs.service.callback.MemberCallbackEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,8 +45,12 @@ public class MemberService implements UserDetailsService {
 
     private final MemberSignUpEventService memberSignUpEventService;
 
-    private final MemberCallbackEvent memberCallbackEvent;
+    private MemberCallbackEvent memberCallbackEvent;
 
+    @Autowired
+    public void setMemberCallbackEvent(MemberCallbackEvent memberCallbackEvent) {
+        this.memberCallbackEvent = memberCallbackEvent;
+    }
 
     @Override
     public UserDetails loadUserByUsername(final String userId) {
@@ -64,11 +69,14 @@ public class MemberService implements UserDetailsService {
         return MemberMapper.INSTANCE.modelToDto(member);
     }
 
-    public MemberResponse getByUserIdAndPassword(HasUserIdPassword userIdPassword) {
+    /**
+     * 로그인 flow 함수
+     * */
+    public MemberResponse getByUserIdAndPasswordForLogin(HasUserIdPassword userIdPassword) {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(userIdPassword.getUserId());
 
-        memberSignUpEventService.validateHistoryInSeconds(userIdPassword);
+        memberSignUpEventService.validateBeforeLogin(userIdPassword);
 
         if (!memberOptional.isPresent()) {
             /**
@@ -92,8 +100,15 @@ public class MemberService implements UserDetailsService {
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
         if (memberOptional.isPresent()
-                || memberSignUpEventService.isSomeOneRequestPending(creationRequest)) {
+                || memberSignUpEventService.didSomeOneRequestPending(creationRequest.getUserId())) {
             throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
+        }
+
+        Optional<Member> memberByUserIdAndRegNo = memberRepository.findByNameAndRegNo(creationRequest.getName(),
+                creationRequest.getRegNo());
+
+        if (memberByUserIdAndRegNo.isPresent()) {
+            throw new AlreadyExistException("이미 등록된 유저 정보입니다.");
         }
 
         memberSignUpEventService.createRequestEvent(creationRequest);
@@ -136,5 +151,19 @@ public class MemberService implements UserDetailsService {
         memberScrapEventService.validateHistory(memberId);
 
         return employeeIncomeService.getByMember(member);
+    }
+
+    @Transactional
+    public void createMember(MemberCreationRequest creationRequest) {
+
+        Member member = new Member(
+                creationRequest.getUserId(),
+                creationRequest.getName(),
+                creationRequest.getRegNo(),
+                passwordEncoder.encode(creationRequest.getPassword())
+        );
+
+        memberRepository.saveAndFlush(member);
+        memberSignUpEventService.requestComplete(creationRequest);
     }
 }

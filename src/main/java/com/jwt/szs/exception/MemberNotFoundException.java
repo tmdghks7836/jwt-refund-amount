@@ -9,7 +9,7 @@ public class MemberNotFoundException extends CustomRuntimeException {
     public MemberNotFoundException(Long id) {
         super(ErrorCode.RESOURCE_NOT_FOUND, new StringBuilder()
                 .append("not found member.id : ")
-                .append(id.toString()).toString());
+                .append(id != null ? id.toString() : null).toString());
     }
 
     public MemberNotFoundException(String userId) {
