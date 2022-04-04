@@ -84,7 +84,7 @@ class MemberServiceTest {
         Mockito.when(memberRepository.findByUserId(any()))
                 .thenReturn(Optional.ofNullable(createMember()));
 
-        MemberResponse memberResponse = memberService.getByUserIdAndPassword(createAuthenticationRequest());
+        MemberResponse memberResponse = memberService.getByUserIdAndPasswordForLogin(createAuthenticationRequest());
 
         assertEquals(userId, memberResponse.getUserId());
         assertEquals(name, memberResponse.getName());
@@ -112,7 +112,7 @@ class MemberServiceTest {
     @DisplayName("회원가입 실패. 누군가 회원가입 요청 중.")
     void signupThrowAlreadyExistException2() {
 
-        Mockito.when(memberSignUpEventService.isSomeOneRequestPending(any()))
+        Mockito.when(memberSignUpEventService.didSomeOneRequestPending(any()))
                 .thenReturn(true);
 
 

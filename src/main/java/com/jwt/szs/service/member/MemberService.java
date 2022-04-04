@@ -69,7 +69,10 @@ public class MemberService implements UserDetailsService {
         return MemberMapper.INSTANCE.modelToDto(member);
     }
 
-    public MemberResponse getByUserIdAndPassword(HasUserIdPassword userIdPassword) {
+    /**
+     * 로그인 flow 함수
+     * */
+    public MemberResponse getByUserIdAndPasswordForLogin(HasUserIdPassword userIdPassword) {
 
         Optional<Member> memberOptional = memberRepository.findByUserId(userIdPassword.getUserId());
 
@@ -97,7 +100,7 @@ public class MemberService implements UserDetailsService {
         Optional<Member> memberOptional = memberRepository.findByUserId(creationRequest.getUserId());
 
         if (memberOptional.isPresent()
-                || memberSignUpEventService.isSomeOneRequestPending(creationRequest)) {
+                || memberSignUpEventService.didSomeOneRequestPending(creationRequest.getUserId())) {
             throw new AlreadyExistException("이미 존재하는 유저 아이디입니다.");
         }
 

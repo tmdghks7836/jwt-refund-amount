@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -34,6 +35,12 @@ class MemberSignUpEventServiceTest {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Value("${szs.find-sign-up-event-seconds}")
+    private Integer findSignUpEventSeconds;
+
+    @Value("${api.test-3o3.timeout}")
+    private Integer test3o3ApiTimeout;
 
     private final String userId = "hong123";
     private final String password = "123";
@@ -77,8 +84,13 @@ class MemberSignUpEventServiceTest {
     @DisplayName("로그인 시 특정 시간 내 회원가입 상태 기록 확인 시 회원가입 요청중일 경우.")
     void validateHistoryInSeconds2() {
 
-        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
-                .thenReturn(Optional.ofNullable(createMemberSignupEvent(MemberSignUpStatus.PENDING)));
+        MemberSignUpEvent memberSignupEvent = createMemberSignupEvent(MemberSignUpStatus.PENDING);
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignupEvent.getUserId(), MemberSignUpStatus.COMPLETED, findSignUpEventSeconds))
+                .thenReturn(Optional.empty());
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignupEvent.getUserId(), MemberSignUpStatus.PENDING, test3o3ApiTimeout))
+                .thenReturn(Optional.ofNullable(memberSignupEvent));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
                 memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
@@ -87,16 +99,43 @@ class MemberSignUpEventServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 시 특정 시간 내 회원가입 상태 기록 확인 시 회원가입 요청 실패날 경우.")
+    @DisplayName("로그인 후 특정 시간 내 회원가입 상태 기록 확인 시 같은 아이디로 누군가 먼저 가입한 경우. 패스워드로 체크")
     void validateHistoryInSeconds3() {
 
-        when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
-                .thenReturn(Optional.ofNullable(createMemberSignupEvent(MemberSignUpStatus.FAILED)));
+        MemberSignUpEvent memberSignupEvent = createMemberSignupEvent(MemberSignUpStatus.FAILED);
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignupEvent.getUserId(), MemberSignUpStatus.COMPLETED, findSignUpEventSeconds))
+                .thenReturn(Optional.empty());
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignupEvent.getUserId(), MemberSignUpStatus.PENDING, test3o3ApiTimeout))
+                .thenReturn(Optional.empty());
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignupEvent.getUserId(), MemberSignUpStatus.FAILED, findSignUpEventSeconds))
+                .thenReturn(Optional.of(memberSignupEvent));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
                 memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
 
         Assertions.assertEquals(ErrorCode.REQUEST_FAILED, customRuntimeException.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("로그인 후 특정 시간 내 회원가입 상태 기록 확인 시 단순히 비밀번호가 틀렸을때, 회원가입 실패 기록이 없습니다.")
+    void validateHistoryInSeconds4() {
+
+        MemberSignUpEvent memberSignUpEvent = createMemberSignupEvent(MemberSignUpStatus.COMPLETED);
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignUpEvent.getUserId(), MemberSignUpStatus.COMPLETED, findSignUpEventSeconds))
+                .thenReturn(Optional.ofNullable(memberSignUpEvent));
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignUpEvent.getUserId(), MemberSignUpStatus.PENDING, findSignUpEventSeconds))
+                .thenReturn(Optional.empty());
+
+        when(signUpEventRepository.findByUserIdAfterSeconds(memberSignUpEvent.getUserId(), MemberSignUpStatus.FAILED, findSignUpEventSeconds))
+                .thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
+
     }
 
     @Test
@@ -106,8 +145,9 @@ class MemberSignUpEventServiceTest {
         when(signUpEventRepository.findByUserIdAfterSeconds(any(), any(), any()))
                 .thenReturn(Optional.ofNullable(createMemberSignupEvent(MemberSignUpStatus.PENDING)));
 
+        AuthenticationRequest authenticationRequest = createAuthenticationRequest();
 
-        boolean someOneRequestPending = memberSignUpEventService.isSomeOneRequestPending(createAuthenticationRequest());
+        boolean someOneRequestPending = memberSignUpEventService.didSomeOneRequestPending(authenticationRequest.getUserId());
 
         Assertions.assertTrue(someOneRequestPending);
     }
@@ -116,7 +156,9 @@ class MemberSignUpEventServiceTest {
     @DisplayName("회원가입시 특정 시간 내 아무도 해당 userId로 가입요청을 보낸 사람이 없을 경우 ")
     void isSomeOneRequestPending2() {
 
-        boolean someOneRequestPending = memberSignUpEventService.isSomeOneRequestPending(createAuthenticationRequest());
+        AuthenticationRequest authenticationRequest = createAuthenticationRequest();
+
+        boolean someOneRequestPending = memberSignUpEventService.didSomeOneRequestPending(authenticationRequest.getUserId());
 
         Assertions.assertFalse(someOneRequestPending);
     }

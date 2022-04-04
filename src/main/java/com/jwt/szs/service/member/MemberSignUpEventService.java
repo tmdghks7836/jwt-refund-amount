@@ -28,7 +28,8 @@ public class MemberSignUpEventService {
 
     private final MemberSignUpEventRepository signUpEventRepository;
 
-    private final Integer secondsOfFindingMember = 60 * 10;
+    @Value("${szs.find-sign-up-event-seconds}")
+    private Integer findSignUpEventSeconds;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -79,52 +80,79 @@ public class MemberSignUpEventService {
     }
 
     /**
-     * 로그인 진행 시 아직 회원가입 요청중인지 회원가입 실패되었는지 일정시간동안 확인합니다.
+     * 로그인 진행 시 아직 회원가입 완료, 요청중, 실패되었는지 일정시간동안 확인합니다.
      */
     public void validateBeforeLogin(HasUserIdPassword useridPassword) {
 
-        if (isSomeOneRequestPending(useridPassword)) {
+        log.info("{}초 내에 생성된 회원의 가입요청 상태정보를 찾습니다..", findSignUpEventSeconds);
+
+        /**
+         * 유저아이디와 패스워드로 최근 회원가입이 완료되었는지 확인합니다.
+         * */
+        if (checkCompletedRequest(useridPassword)) {
+            return;
+        }
+
+        /**
+         * 최근에 해당 아이디로 회원가입 진행중인 이벤트를 찾습니다.
+         * */
+        if (didSomeOneRequestPending(useridPassword.getUserId())) {
             throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING);
         }
 
-        log.info("{}초 내에 생성된 회원의 가입요청 상태정보를 찾습니다..", secondsOfFindingMember);
-
-        Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
-                useridPassword.getUserId(),
-                MemberSignUpStatus.COMPLETED,
-                secondsOfFindingMember
-        );
-
-        if (!signUpEventOptional.isPresent()) {
-            return;
-        }
-
-        MemberSignUpEvent memberSignUpEvent = signUpEventOptional.get();
-
         /**
-         * 다른사람이 동시간에 회원가입 요청 할 경우 비밀번호로 검증합니다.
+         * 회원가입 완료, 요청중이 아니라면, 비밀번호 검증 실패 또는 요청 실패입니다.
          * */
-        if (passwordEncoder.matches(useridPassword.getPassword(), memberSignUpEvent.getPassword())) {
-            return;
+        if (checkFailedRequest(useridPassword.getUserId())) {
+            throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED,
+                    "회원가입에 실패한 정보입니다. 다시 회원가입을 진행해주세요.");
         }
-
-        throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED, "회원가입에 실패한 정보입니다. 다시 회원가입을 진행해주세요.");
     }
 
     /**
      * SoS에서 응답을 받는 시간동안 해당 아이디는 회원가입 요청중 상태로 lock을 잡아놓습니다.
-     * */
-    public boolean isSomeOneRequestPending(HasUserIdPassword useridPassword) {
+     */
+    public boolean didSomeOneRequestPending(String userId) {
+
+        return signUpEventRepository.findByUserIdAfterSeconds(
+                userId,
+                MemberSignUpStatus.PENDING,
+                test3o3ApiTimeout).isPresent();
+    }
+
+    public boolean checkCompletedRequest(HasUserIdPassword useridPassword) {
 
         Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
                 useridPassword.getUserId(),
-                MemberSignUpStatus.PENDING,
+                MemberSignUpStatus.COMPLETED,
                 test3o3ApiTimeout);
 
         if (!signUpEventOptional.isPresent()) {
             return false;
         }
 
-        return signUpEventOptional.get().isPending();
+        MemberSignUpEvent memberSignUpEvent = signUpEventOptional.get();
+
+        /**
+         * 같은아이디로 회원가입 요청한 다른 유저가 아닌
+         * 해당 유저가 회원가입이 성공했는지 비밀번호 검증을 통해 확인합니다.
+         * */
+        if (passwordEncoder.matches(useridPassword.getPassword(), memberSignUpEvent.getPassword())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean checkFailedRequest(String userId) {
+
+        /**
+         * 해당아이디의 회원가입 실패기록이 있는지 확인합니다.
+         * */
+        return signUpEventRepository.findByUserIdAfterSeconds(
+                userId,
+                MemberSignUpStatus.FAILED,
+                findSignUpEventSeconds
+        ).isPresent();
     }
 }

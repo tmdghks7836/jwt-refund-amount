@@ -14,7 +14,7 @@ public enum ErrorCode {
     NOT_MATCHED_VALUE(HttpStatus.BAD_REQUEST, "E0002", "저장된 값과 일지하지 않습니다."),
     TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "E0003", "이미 만료된 토큰입니다."),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E0004", "요청한 리소스를 찾을 수 없습니다."),
-    NOT_MATCHED_PASSWORD(HttpStatus.NOT_FOUND, "E0006", "패스워드가 맞지 않습니다."),
+    NOT_MATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "E0006", "패스워드가 맞지 않습니다."),
     NOT_FOUND_PERMISSION(HttpStatus.FORBIDDEN, "E0007", "권한이 없습니다."),
     AUTHENTICATION_FAIL(HttpStatus.UNAUTHORIZED, "E0008", "인증에 실패하였습니다."),
     ALREADY_EXIST_DATA(HttpStatus.BAD_REQUEST, "E0009", "이미 존재하는 데이터입니다."),
