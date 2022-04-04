@@ -44,8 +44,8 @@
      - 로그인 인증 실패 시 authentication failure handler를 통해 응답.
      - 토근발급시 HMAC-SHA algorithms 을 활용하여 토큰 생성. 
   
-## 하위는 토큰정보 인가를 통한 요청입니다. jwtTokenFilter를 통해 검증하며 jwtExceptionFilter를 통해 예외를 catch합니다. 
-## jwtExceptionFilter에 catch 되지 않고 setAuthentication 하지 않은 상태라면 JwtAuthenticationEntryPoint를 통해 인증 실패를 응답합니다.
+### 하위는 토큰정보 인가를 통한 요청입니다. jwtTokenFilter를 통해 검증하며 jwtExceptionFilter를 통해 예외를 catch합니다. 
+### jwtExceptionFilter에 catch 되지 않고 setAuthentication 하지 않은 상태라면 JwtAuthenticationEntryPoint를 통해 인증 실패를 응답합니다.
   
   3. 내정보 보기 
      - token 검증 후 db에 저장된 정보 반환.
