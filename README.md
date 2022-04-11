@@ -136,7 +136,7 @@
    
     -  메세지 브로커는 보상 트랜잭션 이벤트들을 관리하며 그 이벤트를 구독하고 있는 서비스가 rollback 처리합니다. 
   
-  #### - backward recovery
+  #### - forward recovery
    
     -  반면에 forward recovery 방식은 실패가 발생한 지점에서부터 rollback하지 않고 정보를 유지하여 계속 앞으로 나아가 처리하는 방식입니다.
  
