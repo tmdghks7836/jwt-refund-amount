@@ -9,6 +9,7 @@ import com.jwt.szs.repository.MemberSignUpEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +104,7 @@ public class MemberSignUpEventService {
         /**
          * 회원가입 완료, 요청중이 아니라면, 비밀번호 검증 실패 또는 요청 실패입니다.
          * */
-        if (checkFailedRequest(useridPassword.getUserId())) {
+        if (checkFailedRequest(useridPassword)) {
             throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED,
                     "회원가입에 실패한 정보입니다. 다시 회원가입을 진행해주세요.");
         }
@@ -125,7 +126,7 @@ public class MemberSignUpEventService {
         Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
                 useridPassword.getUserId(),
                 MemberSignUpStatus.COMPLETED,
-                test3o3ApiTimeout);
+                findSignUpEventSeconds);
 
         if (!signUpEventOptional.isPresent()) {
             return false;
@@ -144,15 +145,29 @@ public class MemberSignUpEventService {
         return false;
     }
 
-    public boolean checkFailedRequest(String userId) {
+    public boolean checkFailedRequest(HasUserIdPassword hasUserIdPassword) {
 
         /**
          * 해당아이디의 회원가입 실패기록이 있는지 확인합니다.
          * */
-        return signUpEventRepository.findByUserIdAfterSeconds(
-                userId,
+        Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
+                hasUserIdPassword.getUserId(),
                 MemberSignUpStatus.FAILED,
                 findSignUpEventSeconds
-        ).isPresent();
+        );
+
+        if(!signUpEventOptional.isPresent()){
+            return false;
+        }
+
+        MemberSignUpEvent memberSignUpEvent = signUpEventOptional.get();
+
+        if (!passwordEncoder.matches(hasUserIdPassword.getPassword(), memberSignUpEvent.getPassword())) {
+            return false;
+        }
+
+        log.info("멤버의 패스워드가 같으므로 해당 멤버의 계정은 실패처리된 계정입니다.");
+
+        return true;
     }
 }

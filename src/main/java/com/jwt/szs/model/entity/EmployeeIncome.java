@@ -62,7 +62,6 @@ public class EmployeeIncome extends BaseDateTime {
 
     public void changeInfo(EmployeeIncomeCreationRequest creationRequest){
 
-        this.memberId = memberId;
         this.calculatedTax = creationRequest.getCalculatedTax();
         this.companyName = creationRequest.getCompanyName();
         this.paymentAmount = creationRequest.getPaymentAmount();

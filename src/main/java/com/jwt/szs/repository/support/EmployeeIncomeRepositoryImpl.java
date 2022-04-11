@@ -1,22 +1,19 @@
 package com.jwt.szs.repository.support;
 
 import com.jwt.szs.model.entity.EmployeeIncome;
-import com.jwt.szs.model.entity.Member;
 import com.jwt.szs.model.entity.QEmployeeIncome;
-import com.jwt.szs.repository.support.custom.EmployeeRepositoryCustom;
+import com.jwt.szs.repository.support.custom.EmployeeIncomeRepositoryCustom;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
 @Repository
-public class EmployeeRepositoryImpl extends QuerydslRepositorySupportBasic implements EmployeeRepositoryCustom {
+public class EmployeeIncomeRepositoryImpl extends QuerydslRepositorySupportBasic implements EmployeeIncomeRepositoryCustom {
 
     private final QEmployeeIncome qEmployeeIncome = QEmployeeIncome.employeeIncome;
 
-    public EmployeeRepositoryImpl() {
+    public EmployeeIncomeRepositoryImpl() {
         super(EmployeeIncome.class);
     }
 
@@ -26,14 +23,10 @@ public class EmployeeRepositoryImpl extends QuerydslRepositorySupportBasic imple
         EmployeeIncome employeeIncome = getQueryFactory()
                 .selectFrom(qEmployeeIncome)
                 .where(
-                        memberEq(memberId)
+                        qEmployeeIncome.memberId.eq(memberId)
                 ).fetchOne();
 
         return Optional.ofNullable(employeeIncome);
-    }
-
-    public BooleanExpression memberEq(Long memberId) {
-        return memberId != null ? null : qEmployeeIncome.memberId.eq(memberId);
     }
 
 }

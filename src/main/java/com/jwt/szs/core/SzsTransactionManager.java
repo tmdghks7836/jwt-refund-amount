@@ -15,7 +15,6 @@ public class SzsTransactionManager {
 
     public SzsTransactionManager(TransactionTemplate transactionTemplate) {
         this.transactionTemplate = transactionTemplate;
-        this.transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     public SzsTransactionResult startTransaction(Runnable runnable) {
