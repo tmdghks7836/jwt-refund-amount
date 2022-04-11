@@ -1,7 +1,6 @@
 package com.jwt.szs.repository.support;
 
 import com.jwt.szs.api.codetest3o3.model.type.MemberSignUpStatus;
-import com.jwt.szs.model.base.HasUserIdPassword;
 import com.jwt.szs.model.entity.MemberScrapEvent;
 import com.jwt.szs.model.entity.MemberSignUpEvent;
 import com.jwt.szs.model.entity.QMemberSignUpEvent;
@@ -9,9 +8,7 @@ import com.jwt.szs.repository.support.custom.MemberSignUpEventRepositoryCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.TimeZone;
 

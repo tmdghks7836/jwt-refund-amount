@@ -1,9 +1,10 @@
-package com.jwt.szs.config;
+package com.jwt.szs.security.config;
 
 import com.jwt.szs.filter.*;
-import com.jwt.szs.handler.CustomAuthenticationFailureHandler;
-import com.jwt.szs.handler.CustomAuthenticationSuccessHandler;
-import com.jwt.szs.handler.JwtAuthenticationEntryPoint;
+import com.jwt.szs.security.handler.CustomAuthenticationFailureHandler;
+import com.jwt.szs.security.handler.CustomAuthenticationSuccessHandler;
+import com.jwt.szs.security.handler.JwtAuthenticationEntryPoint;
+import com.jwt.szs.security.filter.CustomAuthenticationFilter;
 import com.jwt.szs.security.provider.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

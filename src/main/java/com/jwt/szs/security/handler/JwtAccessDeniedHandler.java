@@ -1,4 +1,4 @@
-package com.jwt.szs.handler;
+package com.jwt.szs.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jwt.szs.exception.ErrorCode;

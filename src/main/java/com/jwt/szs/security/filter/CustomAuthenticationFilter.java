@@ -1,4 +1,4 @@
-package com.jwt.szs.filter;
+package com.jwt.szs.security.filter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
