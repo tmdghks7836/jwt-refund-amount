@@ -4,10 +4,10 @@ import com.jwt.szs.filter.*;
 import com.jwt.szs.handler.CustomAuthenticationFailureHandler;
 import com.jwt.szs.handler.CustomAuthenticationSuccessHandler;
 import com.jwt.szs.handler.JwtAuthenticationEntryPoint;
+import com.jwt.szs.security.provider.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,7 +16,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -32,6 +31,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
+    private final CustomAuthenticationProvider authenticationProvider;
+
     // 커스텀 인증 필터
     @Bean
     public CustomAuthenticationFilter customAuthenticationProcessingFilter() throws Exception {
@@ -40,6 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationFailureHandler(authenticationFailureHandler);
         filter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
         return filter;
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
+        authenticationManagerBuilder
+                .authenticationProvider(authenticationProvider);
     }
 
     //TODO swagger, h2-console 은 local profile 설정으로 지정해야함
@@ -84,7 +91,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         String apiV1Path = "/szs/";
         return new String[]{
-                "/h2-console/**",
                 apiV1Path + "login",
                 apiV1Path + "signup",
                 apiV1Path + "token/re-issuance",

@@ -56,40 +56,15 @@ public class MemberService implements UserDetailsService {
     public UserDetails loadUserByUsername(final String userId) {
 
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new MemberNotFoundException(userId));
+                .orElseThrow(() -> new UsernameNotFoundException(userId + " not found"));
 
-        return new UserDetailsImpl(member.getId(), member.getUserId(), member.getPassword());
+        return new UserDetailsImpl(member.getUserId(), member.getPassword());
     }
 
     public MemberResponse getByUserId(String userId) {
 
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new MemberNotFoundException(userId));
-
-        return MemberMapper.INSTANCE.modelToDto(member);
-    }
-
-    /**
-     * 로그인 flow 함수
-     * */
-    public MemberResponse getByUserIdAndPasswordForLogin(HasUserIdPassword userIdPassword) {
-
-        Optional<Member> memberOptional = memberRepository.findByUserId(userIdPassword.getUserId());
-
-        memberSignUpEventService.validateBeforeLogin(userIdPassword);
-
-        if (!memberOptional.isPresent()) {
-            /**
-             * authenticationFailureHandler 로 전달 시 AuthenticationException 로 throw
-             * */
-            throw new UsernameNotFoundException(userIdPassword.getUserId() + " not found");
-        }
-
-        Member member = memberOptional.get();
-
-        if (!passwordEncoder.matches(userIdPassword.getPassword(), member.getPassword())) {
-            throw new BadCredentialsException(ErrorCode.NOT_MATCHED_PASSWORD.getDescription());
-        }
 
         return MemberMapper.INSTANCE.modelToDto(member);
     }
@@ -128,10 +103,10 @@ public class MemberService implements UserDetailsService {
     }
 
     @Transactional
-    public void scrap(AuthenticationMemberPrinciple principle) {
+    public void scrap(String userId) {
 
-        Member member = memberRepository.findById(principle.getId())
-                .orElseThrow(() -> new MemberNotFoundException(principle.getId()));
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new MemberNotFoundException(userId));
 
         memberScrapEventService.createRequestEvent(member.getId());
 
@@ -143,12 +118,12 @@ public class MemberService implements UserDetailsService {
         codeTest3o3ApiService.getScrapByNameAndRegNo(nameWithRegNoDto, memberCallbackEvent.getScrapResponseCallback(member.getId()));
     }
 
-    public EmployeeIncomeResponse getRefundInformation(Long memberId) {
+    public EmployeeIncomeResponse getRefundInformation(String userId) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new MemberNotFoundException(userId));
 
-        memberScrapEventService.validateHistory(memberId);
+        memberScrapEventService.validateHistory(member.getId());
 
         return employeeIncomeService.getByMember(member);
     }

@@ -77,7 +77,7 @@ class MemberSignUpEventServiceTest {
                 .thenReturn(Optional.empty());
 
         Assertions.assertDoesNotThrow(() ->
-                memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
+                memberSignUpEventService.validateBeforeLogin(userId, password));
     }
 
     @Test
@@ -93,7 +93,7 @@ class MemberSignUpEventServiceTest {
                 .thenReturn(Optional.ofNullable(memberSignupEvent));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
-                memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
+                memberSignUpEventService.validateBeforeLogin(userId, password));
 
         Assertions.assertEquals(ErrorCode.REQUEST_PENDING, customRuntimeException.getErrorCode());
     }
@@ -114,7 +114,7 @@ class MemberSignUpEventServiceTest {
                 .thenReturn(Optional.of(memberSignupEvent));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
-                memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
+                memberSignUpEventService.validateBeforeLogin(userId, password));
 
         Assertions.assertEquals(ErrorCode.REQUEST_FAILED, customRuntimeException.getErrorCode());
     }
@@ -134,7 +134,7 @@ class MemberSignUpEventServiceTest {
         when(signUpEventRepository.findByUserIdAfterSeconds(memberSignUpEvent.getUserId(), MemberSignUpStatus.FAILED, findSignUpEventSeconds))
                 .thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> memberSignUpEventService.validateBeforeLogin(createAuthenticationRequest()));
+        assertDoesNotThrow(() -> memberSignUpEventService.validateBeforeLogin(userId, password));
 
     }
 

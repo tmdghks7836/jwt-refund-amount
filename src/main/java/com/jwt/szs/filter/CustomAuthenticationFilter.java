@@ -34,6 +34,10 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         super(defaultFilterProcessesUrl);
     }
 
+    /**
+     * attemptAuthentication에서는 간단한 userid password 추출 기능을 담당하고
+     * 인증 관련 부분은 providerManager 에 등록된 AuthenticationProvider 에 책임을 전가.
+     * */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, ServletException, IOException {
 
@@ -42,22 +46,6 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         JsonObject userIdPasswordJson = JsonParser.parseString(body).getAsJsonObject();
         String userId = userIdPasswordJson.get("userId").getAsString();
         String password = userIdPasswordJson.get("password").getAsString();
-
-        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
-                .userId(userId)
-                .password(password)
-                .build();
-        final MemberResponse memberResponse = memberService.getByUserIdAndPasswordForLogin(authenticationRequest);
-
-        final String token = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.ACCESS);
-
-        final String refreshJwt = JwtTokenUtils.generateToken(memberResponse, JwtTokenType.REFRESH);
-
-        refreshTokenService.createRefreshToken(refreshJwt, memberResponse.getId(), JwtTokenType.REFRESH.getValidationSeconds());
-
-        request.setAttribute("authenticationToken", token);
-
-        response.addCookie(JwtTokenUtils.createRefreshTokenCookie(refreshJwt));
 
         return getAuthenticationManager()
                 .authenticate(new UsernamePasswordAuthenticationToken(userId, password));

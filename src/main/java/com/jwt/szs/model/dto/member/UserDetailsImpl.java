@@ -13,27 +13,16 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserDetailsImpl implements UserDetails {
 
-    private Long id;
-
     private String username;
 
     private String password;
-
-    private String token;
 
     private List<GrantedAuthority> authorities = new ArrayList<>();
 
     private boolean enabled = true;
 
-    //인가 플로우일때 생성
-    public UserDetailsImpl(Long id, String username) {
-        this.id = id;
-        this.username = username;
-    }
-
     //인증 플로우일때 생성
-    public UserDetailsImpl(Long id, String username, String password) {
-        this.id = id;
+    public UserDetailsImpl(String username, String password) {
         this.username = username;
         this.password = password;
     }

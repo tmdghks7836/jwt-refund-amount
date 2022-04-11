@@ -24,7 +24,7 @@ public class EmployeeIncomeRepositoryImpl extends QuerydslRepositorySupportBasic
                 .selectFrom(qEmployeeIncome)
                 .where(
                         qEmployeeIncome.memberId.eq(memberId)
-                ).fetchOne();
+                ).fetchFirst();
 
         return Optional.ofNullable(employeeIncome);
     }

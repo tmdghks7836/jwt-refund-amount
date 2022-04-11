@@ -83,28 +83,28 @@ public class MemberSignUpEventService {
     /**
      * 로그인 진행 시 아직 회원가입 완료, 요청중, 실패되었는지 일정시간동안 확인합니다.
      */
-    public void validateBeforeLogin(HasUserIdPassword useridPassword) {
+    public void validateBeforeLogin(String userId, String password) {
 
         log.info("{}초 내에 생성된 회원의 가입요청 상태정보를 찾습니다..", findSignUpEventSeconds);
 
         /**
          * 유저아이디와 패스워드로 최근 회원가입이 완료되었는지 확인합니다.
          * */
-        if (checkCompletedRequest(useridPassword)) {
+        if (checkCompletedRequest(userId, password)) {
             return;
         }
 
         /**
          * 최근에 해당 아이디로 회원가입 진행중인 이벤트를 찾습니다.
          * */
-        if (didSomeOneRequestPending(useridPassword.getUserId())) {
+        if (didSomeOneRequestPending(userId)) {
             throw new CustomRuntimeException(ErrorCode.REQUEST_PENDING);
         }
 
         /**
          * 회원가입 완료, 요청중이 아니라면, 비밀번호 검증 실패 또는 요청 실패입니다.
          * */
-        if (checkFailedRequest(useridPassword)) {
+        if (checkFailedRequest(userId, password)) {
             throw new CustomRuntimeException(ErrorCode.REQUEST_FAILED,
                     "회원가입에 실패한 정보입니다. 다시 회원가입을 진행해주세요.");
         }
@@ -121,10 +121,10 @@ public class MemberSignUpEventService {
                 test3o3ApiTimeout).isPresent();
     }
 
-    public boolean checkCompletedRequest(HasUserIdPassword useridPassword) {
+    public boolean checkCompletedRequest(String userId, String password) {
 
         Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
-                useridPassword.getUserId(),
+                userId,
                 MemberSignUpStatus.COMPLETED,
                 findSignUpEventSeconds);
 
@@ -138,20 +138,20 @@ public class MemberSignUpEventService {
          * 같은아이디로 회원가입 요청한 다른 유저가 아닌
          * 해당 유저가 회원가입이 성공했는지 비밀번호 검증을 통해 확인합니다.
          * */
-        if (passwordEncoder.matches(useridPassword.getPassword(), memberSignUpEvent.getPassword())) {
+        if (passwordEncoder.matches(password, memberSignUpEvent.getPassword())) {
             return true;
         }
 
         return false;
     }
 
-    public boolean checkFailedRequest(HasUserIdPassword hasUserIdPassword) {
+    public boolean checkFailedRequest(String userId, String password) {
 
         /**
          * 해당아이디의 회원가입 실패기록이 있는지 확인합니다.
          * */
         Optional<MemberSignUpEvent> signUpEventOptional = signUpEventRepository.findByUserIdAfterSeconds(
-                hasUserIdPassword.getUserId(),
+                userId,
                 MemberSignUpStatus.FAILED,
                 findSignUpEventSeconds
         );
@@ -162,11 +162,11 @@ public class MemberSignUpEventService {
 
         MemberSignUpEvent memberSignUpEvent = signUpEventOptional.get();
 
-        if (!passwordEncoder.matches(hasUserIdPassword.getPassword(), memberSignUpEvent.getPassword())) {
+        if (!passwordEncoder.matches(password, memberSignUpEvent.getPassword())) {
             return false;
         }
 
-        log.info("멤버의 패스워드가 같으므로 해당 멤버의 계정은 실패처리된 계정입니다.");
+        log.error("멤버의 패스워드가 같으므로 해당 멤버의 계정은 실패처리된 계정입니다.");
 
         return true;
     }

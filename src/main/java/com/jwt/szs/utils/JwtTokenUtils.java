@@ -37,10 +37,6 @@ public class JwtTokenUtils {
         return extractAllClaims(token).get("name", String.class);
     }
 
-    public static Long getId(String token) {
-        return extractAllClaims(token).get("id", Long.class);
-    }
-
     public static JwtTokenType getTokenType(String token) {
 
         String type = extractAllClaims(token).get("type", String.class);
@@ -70,17 +66,15 @@ public class JwtTokenUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public static String generateToken(BaseMember baseMember, JwtTokenType tokenType) {
+    public static String generateToken(String userId, JwtTokenType tokenType) {
 
-        return generateToken(baseMember, tokenType, tokenType.getValidationSeconds());
+        return generateToken(userId, tokenType, tokenType.getValidationSeconds());
     }
 
-    public static String generateToken(BaseMember baseMember, JwtTokenType tokenType, long expireTime) {
+    public static String generateToken(String userId, JwtTokenType tokenType, long expireTime) {
 
         Claims claims = Jwts.claims();
-        claims.put("id", baseMember.getId());
-        claims.put("userId", baseMember.getUserId());
-        claims.put("name", baseMember.getName());
+        claims.put("userId", userId);
         claims.put("type", tokenType.getCookieName());
 
         log.info(tokenType.getCookieName());
@@ -139,18 +133,6 @@ public class JwtTokenUtils {
                 .parseClaimsJws(token);
     }
 
-    public Authentication getAuthentication(String token) {
-
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(getRoles(token))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        UserDetailsImpl userDetails = new UserDetailsImpl(getId(token), getUserId(token));
-
-        return new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
-    }
-
     public static Cookie createRefreshTokenCookie(String value) {
 
         JwtTokenType tokenType = getTokenType(value);
@@ -186,11 +168,11 @@ public class JwtTokenUtils {
         return CookieUtil.getCookie(request, tokenType.getCookieName());
     }
 
-    public static String generateAccessToken(BaseMember baseMember) {
-        return generateToken(baseMember, JwtTokenType.ACCESS);
+    public static String generateAccessToken(String userId) {
+        return generateToken(userId, JwtTokenType.ACCESS);
     }
 
-    public static String generateRefreshToken(BaseMember baseMember) {
-        return generateToken(baseMember, JwtTokenType.REFRESH);
+    public static String generateRefreshToken(String userId) {
+        return generateToken(userId, JwtTokenType.REFRESH);
     }
 }

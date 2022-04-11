@@ -1,6 +1,5 @@
 package com.jwt.szs.model.dto.member;
 
-import com.jwt.szs.model.base.BaseMember;
 import com.jwt.szs.utils.JwtTokenUtils;
 import com.querydsl.core.util.ArrayUtils;
 import lombok.AccessLevel;
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AuthenticationMemberPrinciple implements BaseMember {
+public class AuthenticationMemberPrinciple {
 
     private String token;
 
@@ -33,15 +32,7 @@ public class AuthenticationMemberPrinciple implements BaseMember {
         return AuthorityUtils.createAuthorityList(roles);
     }
 
-    public Long getId() {
-        return JwtTokenUtils.getId(token);
-    }
-
     public String getUserId() {
         return JwtTokenUtils.getUserId(token);
-    }
-
-    public String getName() {
-        return JwtTokenUtils.getName(token);
     }
 }

@@ -1,5 +1,6 @@
 package com.jwt.szs.service;
 
+import com.jwt.szs.exception.AlreadyExpiredRefreshTokenException;
 import com.jwt.szs.exception.CustomRuntimeException;
 import com.jwt.szs.exception.ErrorCode;
 import com.jwt.szs.model.dto.jwt.ReIssuanceTokenDto;
@@ -28,13 +29,13 @@ public class RefreshTokenService {
 
         log.info("액세스 토큰을 재발급합니다.");
 
-        Long memberId = JwtTokenUtils.getId(reIssuanceTokenDto.getRefreshToken());
-        MemberResponse memberResponse = memberService.getById(memberId);
+        String userId = JwtTokenUtils.getUserId(reIssuanceTokenDto.getRefreshToken());
+        MemberResponse memberResponse = memberService.getByUserId(userId);
 
-        return JwtTokenUtils.generateAccessToken(memberResponse);
+        return JwtTokenUtils.generateAccessToken(memberResponse.getUserId());
     }
 
-    public Optional<Long> getMemberIdByRefreshToken(String key) {
+    public Optional<String> getUserIdByRefreshToken(String key) {
 
         return redisRepository.getData(key);
     }
@@ -53,12 +54,16 @@ public class RefreshTokenService {
 
         log.info("리프레시 토큰의 만료기한과 redis에 저장된 토큰값을 확인합니다.");
 
-        Long memberIdByRedis = getMemberIdByRefreshToken(reIssuanceTokenDto.getRefreshToken())
-                .orElseThrow(() -> new CustomRuntimeException(ErrorCode.TOKEN_EXPIRED));
+        String userIdByRedis = getUserIdByRefreshToken(reIssuanceTokenDto.getRefreshToken())
+                .orElseThrow(() -> new AlreadyExpiredRefreshTokenException());
 
-        Long memberId = JwtTokenUtils.getId(reIssuanceTokenDto.getRefreshToken());
+        if(JwtTokenUtils.isTokenExpired(reIssuanceTokenDto.getRefreshToken())){
+            throw new AlreadyExpiredRefreshTokenException();
+        }
 
-        if (!memberIdByRedis.equals(memberId)) {
+        String userId = JwtTokenUtils.getUserId(reIssuanceTokenDto.getRefreshToken());
+
+        if (!userIdByRedis.equals(userId)) {
             throw new CustomRuntimeException(ErrorCode.NOT_MATCHED_VALUE);
         }
 

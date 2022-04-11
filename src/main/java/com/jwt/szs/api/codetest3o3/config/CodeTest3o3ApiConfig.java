@@ -44,7 +44,7 @@ public class CodeTest3o3ApiConfig {
     }
 
     @Bean
-    public CodeTest3o3Api naverEstateApi(Retrofit retrofit) {
+    public CodeTest3o3Api codeTest3o3Api(Retrofit retrofit) {
         return retrofit.create(CodeTest3o3Api.class);
     }
 }

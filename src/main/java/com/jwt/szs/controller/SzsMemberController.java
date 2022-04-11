@@ -84,7 +84,7 @@ public class SzsMemberController {
     @ResponseStatus(HttpStatus.OK)
     public void scrapMyInfo(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
 
-        memberService.scrap(principle);
+        memberService.scrap(principle.getUserId());
     }
 
     @GetMapping("/refund")
@@ -92,6 +92,6 @@ public class SzsMemberController {
     @ResponseStatus(HttpStatus.OK)
     public EmployeeIncomeResponse refund(@AuthenticationPrincipal AuthenticationMemberPrinciple principle) {
 
-        return memberService.getRefundInformation(principle.getId());
+        return memberService.getRefundInformation(principle.getUserId());
     }
 }

@@ -1,6 +1,11 @@
 package com.jwt.szs.handler;
 
 import com.jwt.szs.filter.strategy.CheckJwtTokenStrategy;
+import com.jwt.szs.model.dto.member.AuthenticationMemberPrinciple;
+import com.jwt.szs.model.type.JwtTokenType;
+import com.jwt.szs.service.RefreshTokenService;
+import com.jwt.szs.utils.JwtTokenUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -17,10 +22,12 @@ import java.io.IOException;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Autowired
-    private CheckJwtTokenStrategy jwtTokenStrategy;
+    private final CheckJwtTokenStrategy jwtTokenStrategy;
+
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -29,8 +36,15 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         log.info("success login!!");
 
-        String authenticationToken = (String)request.getAttribute("authenticationToken");
-        jwtTokenStrategy.setResponseToken(response, authenticationToken);
+        AuthenticationMemberPrinciple principal = (AuthenticationMemberPrinciple) authentication.getPrincipal();
+
+        final String refreshJwt = JwtTokenUtils.generateToken(principal.getUserId(), JwtTokenType.REFRESH);
+
+        refreshTokenService.createRefreshToken(refreshJwt, principal.getUserId(), JwtTokenType.REFRESH.getValidationSeconds());
+
+        response.addCookie(JwtTokenUtils.createRefreshTokenCookie(refreshJwt));
+
+        jwtTokenStrategy.setResponseToken(response, principal.getToken());
     }
 
 }

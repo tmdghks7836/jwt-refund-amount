@@ -13,6 +13,7 @@ import com.jwt.szs.model.dto.member.UserDetailsImpl;
 import com.jwt.szs.model.type.JwtTokenType;
 import com.jwt.szs.repository.redis.RedisRepository;
 import com.jwt.szs.service.member.MemberService;
+import com.jwt.szs.utils.CookieUtil;
 import com.jwt.szs.utils.JwtTokenUtils;
 import lombok.Builder;
 import lombok.Getter;
@@ -136,12 +137,9 @@ class MemberControllerTest {
         String password = "123";
         MemberResponse memberResponse = MemberResponse.builder().userId(userId).id(id).build();
 
-        Mockito.when(memberService.getByUserIdAndPasswordForLogin(any()))
-                .thenReturn(memberResponse);
         Mockito.when(memberService.loadUserByUsername(any()))
                 .thenReturn(
                         new UserDetailsImpl(
-                                id,
                                 userId,
                                 passwordEncoder.encode(password)
                         ));
@@ -194,12 +192,12 @@ class MemberControllerTest {
     public void 토큰재발급() throws Exception {
 
         MemberResponse memberResponse = MemberResponse.builder().id(123l).userId("tmdghks").build();
-        String token = generateExpiredAccessToken(memberResponse);
-        Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
+        String token = generateExpiredAccessToken(memberResponse.getUserId());
+        Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse.getUserId());
 
         Mockito.when(redisRepository.getData(anyString()))
-                .thenReturn(Optional.of(memberResponse.getId()));
-        Mockito.when(memberService.getById(any()))
+                .thenReturn(Optional.of(memberResponse.getUserId()));
+        Mockito.when(memberService.getByUserId(any()))
                 .thenReturn(memberResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
@@ -216,11 +214,11 @@ class MemberControllerTest {
     public void 토큰재발급_실패_아직만료되지않은_액세스토큰() throws Exception {
 
         MemberResponse memberResponse = MemberResponse.builder().id(123l).userId("tmdghks").build();
-        String token = generateAccessToken(memberResponse);
-        Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse);
+        String token = generateAccessToken(memberResponse.getUserId());
+        Cookie refreshTokenCookie = generateRefreshTokenCookie(memberResponse.getUserId());
 
         Mockito.when(redisRepository.getData(anyString()))
-                .thenReturn(Optional.of(memberResponse.getId()));
+                .thenReturn(Optional.of(memberResponse.getUserId()));
 
         MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -231,6 +229,28 @@ class MemberControllerTest {
 
         ErrorCode errorCode = jsonToErrorCode(mvcResult.getResponse().getContentAsString());
         Assertions.assertEquals(ErrorCode.NOT_YET_EXPIRED_TOKEN, errorCode);
+    }
+
+    @Test
+    public void 토큰재발급_실패_만료된_리프레시토큰() throws Exception {
+
+        MemberResponse memberResponse = MemberResponse.builder().id(123l).userId("tmdghks").build();
+
+        String token = generateAccessToken(memberResponse.getUserId());
+        Cookie refreshTokenCookie = generateExpiredRefreshTokenCookie(memberResponse.getUserId());
+
+        Mockito.when(redisRepository.getData(anyString()))
+                .thenReturn(Optional.of(memberResponse.getUserId()));
+
+        MvcResult mvcResult = mockMvc.perform(get("/szs/token/re-issuance")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .cookie(refreshTokenCookie))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andReturn();
+
+        ErrorCode errorCode = jsonToErrorCode(mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(ErrorCode.TOKEN_EXPIRED, errorCode);
     }
 
     private ErrorCode jsonToErrorCode(String json) throws JsonProcessingException {
@@ -251,21 +271,32 @@ class MemberControllerTest {
         return gson.toJson(request);
     }
 
-    private String generateAccessToken(BaseMember baseMember) {
+    private String generateAccessToken(String userId) {
 
-        return JwtTokenUtils.generateToken(baseMember, JwtTokenType.ACCESS);
+        return JwtTokenUtils.generateToken(userId, JwtTokenType.ACCESS);
     }
 
-    private String generateExpiredAccessToken(BaseMember baseMember) {
+    private Cookie generateRefreshTokenCookie(String userId) {
 
-        return JwtTokenUtils.generateToken(baseMember, JwtTokenType.ACCESS, -1l);
-    }
-
-    private Cookie generateRefreshTokenCookie(BaseMember baseMember) {
-
-        final String token = JwtTokenUtils.generateToken(baseMember, JwtTokenType.REFRESH);
+        final String token = JwtTokenUtils.generateToken(userId, JwtTokenType.REFRESH);
         return JwtTokenUtils.createRefreshTokenCookie(token);
     }
+
+    private String generateExpiredAccessToken(String userId) {
+
+        return JwtTokenUtils.generateToken(userId, JwtTokenType.ACCESS, -1l);
+    }
+
+    private Cookie generateExpiredRefreshTokenCookie(String userId) {
+
+        final String token = JwtTokenUtils.generateToken(userId, JwtTokenType.REFRESH, -1);
+        return CookieUtil.createCookie(
+                JwtTokenType.REFRESH.getCookieName(),
+                token,
+                JwtTokenType.REFRESH.getValidationSeconds());
+    }
+
+
 
     @Getter
     @Setter

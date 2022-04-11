@@ -24,13 +24,9 @@ public class MemberRepositoryImpl extends QuerydslRepositorySupportBasic impleme
         Member member = getQueryFactory()
                 .selectFrom(qMember)
                 .where(
-                        userIdEq(userId)
-                ).fetchOne();
+                        qMember.userId.eq(userId)
+                ).fetchFirst();
 
         return Optional.ofNullable(member);
-    }
-
-    public BooleanExpression userIdEq(String userId) {
-        return !StringUtils.hasText(userId) ? null : qMember.userId.eq(userId);
     }
 }

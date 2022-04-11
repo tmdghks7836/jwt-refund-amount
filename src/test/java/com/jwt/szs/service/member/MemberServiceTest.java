@@ -79,19 +79,6 @@ class MemberServiceTest {
     }
 
     @Test
-    void getByUserIdAndPassword() {
-
-        Mockito.when(memberRepository.findByUserId(any()))
-                .thenReturn(Optional.ofNullable(createMember()));
-
-        MemberResponse memberResponse = memberService.getByUserIdAndPasswordForLogin(createAuthenticationRequest());
-
-        assertEquals(userId, memberResponse.getUserId());
-        assertEquals(name, memberResponse.getName());
-        assertEquals(regNo, memberResponse.getRegNo());
-    }
-
-    @Test
     void 회원가입() {
 
         memberService.signUp(createMemberCreationRequest());
@@ -136,33 +123,33 @@ class MemberServiceTest {
     @DisplayName("회원가입 실패. 멤버를 찾을 수 없음.")
     void scrapFailed() {
 
-        Mockito.when(memberRepository.findById(any()))
+        Mockito.when(memberRepository.findByUserId(any()))
                 .thenReturn(Optional.ofNullable(null));
 
         Mockito.when(memberScrapEventRepository.save(any()))
                 .thenReturn(any());
 
         Assertions.assertThrows(MemberNotFoundException.class, () ->
-                memberService.scrap(authenticationMemberPrinciple()));
+                memberService.scrap(userId));
     }
 
     @Test
     void scrap() {
 
-        Mockito.when(memberRepository.findById(any()))
+        Mockito.when(memberRepository.findByUserId(any()))
                 .thenReturn(Optional.ofNullable(createMember()));
 
         Mockito.when(memberScrapEventRepository.save(any()))
                 .thenReturn(any());
 
-        memberService.scrap(authenticationMemberPrinciple());
+        memberService.scrap(userId);
     }
 
     @Test
     @DisplayName("환급 요청 이력이 없습니다..")
     void getRefundInformationFailed() {
 
-        Mockito.when(memberRepository.findById(any()))
+        Mockito.when(memberRepository.findByUserId(any()))
                 .thenReturn(Optional.ofNullable(createMember()));
 
         CustomRuntimeException customRuntimeException = assertThrows(CustomRuntimeException.class, () ->
@@ -176,18 +163,6 @@ class MemberServiceTest {
         return new Member(userId, name, regNo, passwordEncoder.encode(password));
     }
 
-    AuthenticationRequest createAuthenticationRequest() {
-        return AuthenticationRequest.builder()
-                .userId(userId)
-                .password(password).build();
-    }
-
-    AuthenticationMemberPrinciple authenticationMemberPrinciple() {
-
-        String token = generateAccessToken(createMember());
-        return new AuthenticationMemberPrinciple(token);
-    }
-
     MemberCreationRequest createMemberCreationRequest() {
         return MemberCreationRequest.builder()
                 .userId(userId)
@@ -196,8 +171,4 @@ class MemberServiceTest {
                 .regNo(regNo).build();
     }
 
-    private String generateAccessToken(BaseMember baseMember) {
-
-        return JwtTokenUtils.generateToken(baseMember, JwtTokenType.ACCESS);
-    }
 }
